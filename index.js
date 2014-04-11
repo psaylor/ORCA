@@ -7,7 +7,9 @@ $(function() {
     console.error("No speech recognition detected.");
   }
 
-  final_txpt = '';
+   final_txpt = '';
+  var recognizing = false;
+  var ignore_onend = false;
 
   // configure the recognizer
   recognition.continuous = true;
@@ -51,8 +53,19 @@ $(function() {
         interim_txpt += event.results[i][0].transcript;
       }
     }
+    $("#recognized-content-final").html(final_txpt);
+    $("#recognized-content-interim").html(interim_txpt);
     console.log("Final transcript: " + final_txpt);
     console.log("Intermediate transcript: " + interim_txpt);
   };
+
+  $("#speech-mic").click(function() {
+    console.log("Clicked.");
+    if (recognizing) {
+      recognition.stop();
+    } else {
+      recognition.start();
+    }
+  });
 
 });
