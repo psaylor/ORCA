@@ -117,13 +117,63 @@ $(function() {
     M = D[0].length - 1
     path = new Array();
     path.push([N, M]);
-    var n = N-1;
-    var m = M-1;
-    while ( !( (n===1) && (m===1) ) )
+    var n = N;
+    var m = M;
+    console.log("Adding " + n + ", " + m);
+    while ( !( (n===1) && (m===1) ) ) {
+      if (n === 1) {
+        console.log("n is 1");
+        m = m -1;
+      } else if (m === 1) {
+        console.log("m is 1");
+        n = n -1;
+      } else {
+
+        if ( D[n-1][m-1] <= D[n-1][m] ) {
+          if ( D[n-1][m-1] <= D[n][m-1] ) {
+            console.log("Diagonal: n-1, m-1 is smallest");
+            n = n -1;
+            m = m - 1;
+          } else {
+            console.log("Horizontal: n, m-1 is smallest");
+            m = m - 1;
+          }
+        } else {
+          if ( D[n-1][m] < D[n][m-1] ) {
+            console.log("Vertical: n-1, m is smallest");
+            n = n - 1;
+          } else {
+            console.log("Horizontal: n, m-1 is smallest");
+            m = m - 1;
+          }
+        }
+      }
+      console.log("Adding " + n + ", " + m);
+      path.push([n, m]);
+    }
+    path.push([0,0]);
+    path.reverse();
+    return path;
   };
 
-  DTWAlignment = function(text, txpt, D) {
+  DTWAlignment = function(text, txpt, path) {
+    console.log("Text: " + text);
+    console.log("Txpt: " + txpt);
+    console.log("Path: ");
+    console.log(path);
 
+    for (var i = 0; i < path.length; i++) {
+      n = path[i][0];
+      m = path[i][1];
+      console.log(text[m] + " : " + txpt[n]);
+    };
   };
+
+  text = "pardoning";
+  txpt = "persons";
+
+  D = DTWCost(text, txpt);
+  p = DTWOptimalPath(D);
+  DTWAlignment(text, txpt, p);
 
 });
