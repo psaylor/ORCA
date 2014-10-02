@@ -1,0 +1,23 @@
+{
+  "name": "orca_server",
+  "version": "1.0.0",
+  "description": "Orca server for real time audio streaming and speech recognition.",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "Patricia Saylor",
+  "license": "ISC",
+  "dependencies": {
+    "binaryjs": "^0.2.1"
+  },
+  "devDependencies": {},
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/saylorp/ORCA.git"
+  },
+  "bugs": {
+    "url": "https://github.com/saylorp/ORCA/issues"
+  },
+  "homepage": "https://github.com/saylorp/ORCA"
+}

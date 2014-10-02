@@ -5,9 +5,10 @@ $(function() {
     var recognition = new SpeechRecognition();
   } catch(e) {
     console.error("No speech recognition detected.");
+    return;
   }
 
-   final_txpt = '';
+  final_txpt = '';
   var recognizing = false;
   var ignore_onend = false;
 
@@ -17,7 +18,7 @@ $(function() {
 
   recognition.onstart = function() {
     recognizing = true;
-    console.log("Recognition started");
+    console.log("Speech recognition started");
     $("#speech-mic").switchClass("btn-success", "btn-danger");
   };
 
