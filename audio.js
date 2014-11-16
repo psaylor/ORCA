@@ -57,6 +57,8 @@ $(function() {
 
 		// otherwise not recording yet
 		recording = true;
+		console.log("Trying to make binary client to localhost 9001");
+		// client = new BinaryClient('ws://sls-quad-27.csail.mit.edu:9001');
 		client = new BinaryClient('ws://localhost:9001');
 		console.log("client", client);
 
@@ -84,6 +86,7 @@ $(function() {
 				// Failed to construct 'AudioContext': number of hardware contexts reached maximum (6)
 				var context = new audioContext();
 				var audioInput = context.createMediaStreamSource(localMediaStream);
+				audioInput.context.sampleRate = 48000;
 				console.log(audioInput);
 				var bufferSize = 2048;
 
@@ -98,6 +101,7 @@ $(function() {
 				recorder.connect(context.destination);
 
 				console.log("audioInput", audioInput);
+
 				console.log("recorder", recorder);
 			},
 			function(e) { // errorCallback
