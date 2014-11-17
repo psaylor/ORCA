@@ -69,3 +69,5 @@ cat ttt.wav | ffmpeg -i pipe:0 -ar 22100 pipe:1 | cat > t4.wav
 var child_convert = spawn('ffmpeg', ['-acodec', 'pcm_s16le', '-f', 'wav', '-ar', '44.1k', '-i', '-', '-acodec', 'pcm_s16le', '-ar', '16000', '-ac', '1', '-f', 'wav', '-']);
 
 var child_convert = spawn('ffmpeg', ['-acodec', 'pcm_s16le', '-f', 'wav', '-ar', '44.1k', '-i', 'recordings/ttt.wav', '-acodec', 'pcm_s16le', '-ar', '16000', '-ac', '1', '-f', 'wav', 'recordings8/abc123.wav']);
+
+ffmpeg -acodec pcm_s16le -ac 1 -f s16le -i pipe:0 -ar 19000 -acodec pcm_s16le rawtest.wav

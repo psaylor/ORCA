@@ -2,7 +2,7 @@ var binaryServer = require('binaryjs').BinaryServer;
 var wav = require('wav');
 var exec = require('child_process').exec;
 var spawn = require('child_process').spawn;
-var os=require('os');
+var os = require('os');
 var ffmpeg = require('fluent-ffmpeg');
 var fs = require('fs');
 
@@ -81,12 +81,12 @@ server.on('connection', function(client) {
 		    bitDepth: 16
 		});
 
-		var inStream = fs.createReadStream('recordings/ttt.wav');
-		var outStream = fs.createWriteStream('recordings/writestream.wav')
+		// var inStream = fs.createReadStream('recordings/ttt.wav');
+		// var outStream = fs.createWriteStream('recordings/writestream.wav', {encoding: 'binary'})
 
 		var command = ffmpeg()
-						.input(inStream)
-						.inputFormat('wav')
+						.input(stream)
+						.inputFormat('s16le')
 						.inputOptions([
 							'-acodec pcm_s16le',
 							'-ac 1',
@@ -104,6 +104,9 @@ server.on('connection', function(client) {
 		    console.log('Input is ' + data.audio + ' audio with ' + data.video + ' video');
 		    console.log('Input is ' + data.format + ' and ' + data.audio_details);
   		});
+  		command.on('progress', function(progress) {
+		    console.log('Processing: ' + progress.frames + ' frames');
+		});
 		command.on('error', function(err, stdout, stderr) {
 		    console.log('Cannot process video: ' + err.message);
 		    console.log("Command Stdout: ", stdout);
@@ -113,24 +116,11 @@ server.on('connection', function(client) {
 		    console.log('Transcoding succeeded !');
 		});
 
-		command.pipe(outStream, {end: true});
+		stream.on('data', function(data) {
+			console.log('stream data: ', data.length, data);
+		});
 
-		
-		// exec('ffmpeg -loglevel debug', logAll);
-		// var child_convert = spawn('ffmpeg', ['-acodec', 'pcm_s16le', '-f', 'wav', '-ar', '44.1k', '-i', 'recordings/ttt.wav', '-acodec', 'pcm_s16le', '-ar', '16000', '-ac', '1', '-f', 's16le', 'recordings8/abc123.raw']);
-		// console.log("child convert process", child_convert.pid);
-		// child_convert.stdout.on('data', function(data) {
-		// 	console.log("stdout: " + data);
-		// });
-		// child_convert.stderr.on('data', function(data) {
-		// 	console.log('stderr: ' + data);
-		// });
-
-		// stream.on('data', function(data) {
-		// 	console.log('stream data: ' );
-		// });
-
-		// stream.pipe(fileWriter);
+		// stream.pipe(outStream, {end: true});
 		// stream.pipe(child_convert); //.stdout.pipe(fileWriter);
 		stream.on('end', function() {
 			// fileWriter.end();
@@ -144,6 +134,12 @@ server.on('connection', function(client) {
 			}
 			console.log("Stream closed.");
 		});
+
+		// console.log("FFMPEG COMMAND", command);
+		stream.pipe(command);
+		// console.log("SREAM", stream);
+		command.pipe(fileWriter, {end: true});
+		// console.log("FFMPEG COMMAND AFTER", command);
 	});
 
 	client.on('close', function() {
@@ -158,40 +154,4 @@ server.on('connection', function(client) {
 
 // var child = execFile(file, [args], [options], [callback]);
 
-console.log("Server ready...");
-
-var inFile = 'recordings/1414604189445.wav'
-// var inFile = 'recordings/ttt.wav'
-var inStream = fs.createReadStream(inFile);
-var outStream = fs.createWriteStream('recordings/writestream.wav')
-
-var command = ffmpeg()
-				.input(inStream)
-				.inputFormat('wav')
-				.inputOptions([
-					'-acodec pcm_s16le',
-					'-ac 1',
-					])
-				.audioCodec('pcm_s16le')
-				.audioChannels(1)
-				.audioFrequency(DEFAULT_SAMPLE_RATE)
-				.outputFormat('s16le');
-
-
-command.on('start', function(commandLine) {
-	console.log("Spawned Ffmpeg with command " + commandLine);
-});
-command.on('codecData', function(data) {
-    console.log('Input is ' + data.audio + ' audio with ' + data.video + ' video');
-    console.log('Input is ' + data.format + ' and ' + data.audio_details);
-	});
-command.on('error', function(err, stdout, stderr) {
-    console.log('Cannot process video: ' + err.message);
-    console.log("Command Stdout: ", stdout);
-    console.log("Command Stderr: ", stderr)
-});
-command.on('end', function() {
-    console.log('Transcoding succeeded !');
-});
-
-command.pipe(outStream, {end: true});
+console.log("Server ready...\n");

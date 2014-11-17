@@ -35,6 +35,7 @@ $(function() {
 
 	var audioContext =  window.AudioContext;
 	console.log("AudioContext set up", audioContext);
+	var context = new audioContext();
 
 	var session = {audio: true, video: false};
 
@@ -84,7 +85,7 @@ $(function() {
 			function(localMediaStream) {
 				// you can only have 6 instances of audioContext at a time
 				// Failed to construct 'AudioContext': number of hardware contexts reached maximum (6)
-				var context = new audioContext();
+				// var context = new audioContext();
 				var audioInput = context.createMediaStreamSource(localMediaStream);
 				audioInput.context.sampleRate = 48000;
 				console.log(audioInput);
