@@ -21,7 +21,7 @@ for (var dev in ifaces) {
   });
 }
 
-var DEFAULT_SAMPLE_RATE = 16 * 1000;  // 16 kHz
+var DEFAULT_SAMPLE_RATE = 8 * 1000;  // 8 kHz
 console.log("Default sample rate: " + DEFAULT_SAMPLE_RATE);
 
 var logAll = function (error, stdout, stderr) {
@@ -32,22 +32,8 @@ var logAll = function (error, stdout, stderr) {
 	}
 }
 
-var convertFile = function(fileName, newKHz) {
-	var newFileName = "recordings8/"+ new Date().getTime()  + ".wav"
-	console.log("Converting " + fileName + " to " + newKHz + " in " + newFileName);
-	var child = exec('sox ' + fileName + ' -r ' + newKHz + ' ' + newFileName, logAll);
-	return newFileName;
-}
-
-var streaming_conversion = function(newKHz) {
-	var newFileName = "recordings8/"+ new Date().getTime()  + ".wav"
-	console.log("Converting stdin to " + newKHz + " in " + newFileName);
-	// need to use spawn instead of exec b/c spawn returns a stream whereas exec returns a buffer
-	var child = spawn('sox', ['-', '-r', newKHz.toString(), newFileName]);
-	return newFileName;
-}
-
 var recognizeFile = function(fileName) {
+	// var child = execFile(file, [args], [options], [callback]);
 	console.log("Running recognition on " + fileName);
 	var child = exec('pwd', logAll);
 	var child = exec('./decode_audio.sh ' + fileName,
@@ -70,19 +56,24 @@ server.on('connection', function(client) {
 	console.log("new client connection...");
 	var fileWriter = null;
 	var fileName = null;
+	var rawFileName = null;
+	var numStreamWritesReceived = 0;
 
 	client.on('stream', function(stream, meta) {
 		console.log("Streaming started...");
-		fileName = "recordings8/"+ new Date().getTime()  + ".wav"
+		console.log("Streaming meta", meta);
+		var t = new Date().getTime();
+		fileName = "recordings8/" + t  + ".wav";
+		rawFileName = "recordings/" + t + ".raw";
 		console.log("Saving to filename " + fileName);
-		var fileWriter = new wav.FileWriter(fileName, {
+
+		var wavFileWriter = new wav.FileWriter(fileName, {
 		    channels: 1,
 		    sampleRate: DEFAULT_SAMPLE_RATE,
 		    bitDepth: 16
 		});
 
-		// var inStream = fs.createReadStream('recordings/ttt.wav');
-		// var outStream = fs.createWriteStream('recordings/writestream.wav', {encoding: 'binary'})
+		var rawFileWriter = fs.createWriteStream(rawFileName, {encoding: 'binary'});
 
 		var command = ffmpeg()
 						.input(stream)
@@ -105,7 +96,7 @@ server.on('connection', function(client) {
 		    console.log('Input is ' + data.format + ' and ' + data.audio_details);
   		});
   		command.on('progress', function(progress) {
-		    console.log('Processing: ' + progress.frames + ' frames');
+		    console.log('Processing progress: ', progress);
 		});
 		command.on('error', function(err, stdout, stderr) {
 		    console.log('Cannot process video: ' + err.message);
@@ -117,41 +108,36 @@ server.on('connection', function(client) {
 		});
 
 		stream.on('data', function(data) {
-			console.log('stream data: ', data.length, data);
+			numStreamWritesReceived+= 1;
+			console.log('stream data of length %d, number %d', data.length, numStreamWritesReceived);
 		});
 
-		// stream.pipe(outStream, {end: true});
-		// stream.pipe(child_convert); //.stdout.pipe(fileWriter);
 		stream.on('end', function() {
-			// fileWriter.end();
 			console.log("Streaming ended.");
-			// newFileName = convertFile(fileName, DEFAULT_SAMPLE_RATE);
+			console.log("Saving to filename " + fileName);
 			// recognizeFile(fileName);
 		});
 		stream.on('close', function() {
-			if (fileWriter != null) {
-				fileWriter.end();
+			if (wavFileWriter != null) {
+				wavFileWriter.end();
 			}
 			console.log("Stream closed.");
+			console.log("Saving to filename " + fileName);
 		});
 
-		// console.log("FFMPEG COMMAND", command);
 		stream.pipe(command);
-		// console.log("SREAM", stream);
-		command.pipe(fileWriter, {end: true});
-		// console.log("FFMPEG COMMAND AFTER", command);
+		stream.pipe(rawFileWriter, {end: true});
+		command.pipe(wavFileWriter, {end: true});
 	});
 
 	client.on('close', function() {
-		if (fileWriter != null) {
-			fileWriter.end();
+		if (wavFileWriter != null) {
+			wavFileWriter.end();
 		}
 		console.log("Connection closed.");
-		// newFileName = convertFile(fileName, DEFAULT_SAMPLE_RATE);
 		// recognizeFile(fileName);
 	});
 });
 
-// var child = execFile(file, [args], [options], [callback]);
 
 console.log("Server ready...\n");

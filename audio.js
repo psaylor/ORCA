@@ -44,7 +44,7 @@ $(function() {
 	var recording = false;
 	var binStream = null;
 	var recordBtn = $("#rec-btn");
-
+	var numStreamWrites = 0;
 	
 	function toggleRecording(e) {
 		recordBtn.toggleClass("btn-primary btn-danger");
@@ -53,14 +53,22 @@ $(function() {
 			recorder.disconnect();
 			client.close();
 			recording = false;
+			numStreamWrites = 0;
 			return;
 		}
 
 		// otherwise not recording yet
 		recording = true;
 		console.log("Trying to make binary client to localhost 9001");
-		// client = new BinaryClient('ws://sls-quad-27.csail.mit.edu:9001');
-		client = new BinaryClient('ws://localhost:9001');
+
+		console.log("Trying to connect to remote server");
+		// client = new BinaryClient('ws://sls-apache-0.csail.mit.edu:9001');
+		client = new BinaryClient('ws://sls-quad-27.csail.mit.edu:9001');
+
+
+		// console.log("Looking for local connection");
+		// client = new BinaryClient('ws://localhost:9001');
+		
 		console.log("client", client);
 
 		client.on('open', function() {
@@ -87,7 +95,6 @@ $(function() {
 				// Failed to construct 'AudioContext': number of hardware contexts reached maximum (6)
 				// var context = new audioContext();
 				var audioInput = context.createMediaStreamSource(localMediaStream);
-				audioInput.context.sampleRate = 48000;
 				console.log(audioInput);
 				var bufferSize = 2048;
 
@@ -111,12 +118,15 @@ $(function() {
 		);
 	}
 
-
+	
 	// TODO: investigate whether Socket.IO or BinaryJS is better for the binary comms
 	function recorderProcess(audioProcessingEvent) {
 		// since we are recording in mono we only need the left channel
 		var left = audioProcessingEvent.inputBuffer.getChannelData(0); // PCM data samples from left channel
-		binStream.write(convertFloat32ToInt16(left));
+		var converted = convertFloat32ToInt16(left);
+		binStream.write(converted);
+		numStreamWrites+= 1;
+		console.log("Writing %d length buffer to binary stream: %d ", converted.byteLength, numStreamWrites);
 	};
 
 	function convertFloat32ToInt16(buffer) {

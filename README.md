@@ -32,6 +32,7 @@ to upload: scp index.js psaylor@ftp.dialup.mit.edu:/mit/psaylor/web_scripts/ORCA
 check server running with netstat
 sls-apache-0, web.sls runs on the cloud, node.js stuff on there already, and ssls
 
+killall -9 node if instance of the server seems to still be running
 
 
 Recognition stderr /usr/users/psaylor/kaldi-trunk//src/online2bin/online2-wav-nnet2-latgen-faster --do-endpointing=false --online=false --config=/usr/users/psaylor/kaldi-trunk/egs/fisher_english/s5/nnet_a_gpu_online/conf/online_nnet2_decoding.conf --max-active=7000 --beam=15.0 --lattice-beam=6.0 --acoustic-scale=0.1 --word-symbol-table=/usr/users/psaylor/kaldi-trunk/egs/fisher_english/s5/graph/words.txt /usr/users/psaylor/kaldi-trunk/egs/fisher_english/s5/nnet_a_gpu_online/smbr_epoch2.mdl /usr/users/psaylor/kaldi-trunk/egs/fisher_english/s5/graph/HCLG.fst 'ark:echo utterance-id1 utterance-id1|' 'scp:echo utterance-id1 recordings8/1414606085247.wav|' ark:/dev/null 
