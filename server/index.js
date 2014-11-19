@@ -65,7 +65,8 @@ server.on('connection', function(client) {
 		var t = new Date().getTime();
 		fileName = "recordings8/" + t  + ".wav";
 		rawFileName = "recordings/" + t + ".raw";
-		console.log("Saving to filename " + fileName);
+		console.log("Saving raw audio to file " + rawFileName);
+		console.log("Saving wav audio to file " + fileName);
 
 		var wavFileWriter = new wav.FileWriter(fileName, {
 		    channels: 1,
@@ -122,18 +123,16 @@ server.on('connection', function(client) {
 				wavFileWriter.end();
 			}
 			console.log("Stream closed.");
-			console.log("Saving to filename " + fileName);
-		});
+			console.log("Saving raw audio to file " + rawFileName);
+			console.log("Saving wav audio to file " + fileName);
 
-		stream.pipe(command);
+		});
 		stream.pipe(rawFileWriter, {end: true});
+		stream.pipe(command);
 		command.pipe(wavFileWriter, {end: true});
 	});
 
 	client.on('close', function() {
-		if (wavFileWriter != null) {
-			wavFileWriter.end();
-		}
 		console.log("Connection closed.");
 		// recognizeFile(fileName);
 	});
