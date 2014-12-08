@@ -72,3 +72,18 @@ var child_convert = spawn('ffmpeg', ['-acodec', 'pcm_s16le', '-f', 'wav', '-ar',
 var child_convert = spawn('ffmpeg', ['-acodec', 'pcm_s16le', '-f', 'wav', '-ar', '44.1k', '-i', 'recordings/ttt.wav', '-acodec', 'pcm_s16le', '-ar', '16000', '-ac', '1', '-f', 'wav', 'recordings8/abc123.wav']);
 
 ffmpeg -acodec pcm_s16le -ac 1 -f s16le -i pipe:0 -ar 19000 -acodec pcm_s16le rawtest.wav
+
+
+
+locally, first progress after 37 chunks
+remotely, first progress after 122 chunks
+
+ffmpeg -f s16le -acodec pcm_s16le -ac 1 -i 1416358278119.raw testing.wav
+
+local ffmpeg
+ffmpeg version 2.4.3 Copyright (c) 2000-2014 the FFmpeg developers
+  built on Nov  4 2014 11:01:51 with llvm-gcc 4.2.1 (LLVM build 2336.11.00)
+
+remote ffmepg
+ffmpeg version 1.2.6-7:1.2.6-1~trusty1 Copyright (c) 2000-2014 the FFmpeg developers
+  built on Apr 26 2014 18:52:58 with gcc 4.8 (Ubuntu 4.8.2-19ubuntu1)

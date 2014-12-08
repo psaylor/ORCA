@@ -18,6 +18,7 @@ $(function() {
 	window.URL = Modernizr.prefixed('URL', window);
 });
 
+// Remote
 $(function() {
 	console.log("Seting up context and methods");
 
@@ -51,6 +52,7 @@ $(function() {
 		if (recording) {
 			// stop recording
 			recorder.disconnect();
+			binStream.end();
 			client.close();
 			recording = false;
 			numStreamWrites = 0;
@@ -63,7 +65,8 @@ $(function() {
 
 		console.log("Trying to connect to remote server");
 		// client = new BinaryClient('ws://sls-apache-0.csail.mit.edu:9001');
-		client = new BinaryClient('ws://sls-quad-27.csail.mit.edu:9001');
+		// client = new BinaryClient('ws://sls-quad-27.csail.mit.edu:9001');
+		client = new BinaryClient('ws://sugar-bear.csail.mit.edu:9001');
 
 
 		// console.log("Looking for local connection");
@@ -75,6 +78,26 @@ $(function() {
 			// for the sake of this example let's put the stream in the window
 			console.log("Opening client connection");
 			binStream = client.createStream();
+
+			binStream.on('data', function(data) {
+				console.log("Client stream received data: ", data);
+			});
+
+			binStream.on('end', function () {
+				console.log("Client stream ended.");
+			});
+
+			binStream.on('close', function () {
+				console.log("Client stream closed");
+			});
+
+			binStream.on('error', function (error) {
+				console.log("Client stream encountered an error: ", error);
+			});
+		});
+
+		client.on('close', function () {
+			console.log("Client closed");
 		});
 		startGetUserMedia();
 	};
@@ -154,5 +177,153 @@ $(function() {
 	// };
 
 	// audioTracks = getAudioTracks();
+
+});
+
+// Local
+$(function() {
+	console.log("Seting up context and methods");
+
+	var audioContext =  window.AudioContext;
+	console.log("Second AudioContext set up", audioContext);
+	var context = new audioContext();
+
+	var session = {audio: true, video: false};
+
+	var client = null;
+	var recorder = null;
+	var connected = false;
+	var recording = false;
+	var binStream = null;
+	var recordBtn = $("#rec-btn-local");
+	var numStreamWrites = 0;
+
+	function setupStream() {
+		if (binStream === null) {
+			binStream = client.createStream();
+
+			binStream.on('data', function(data) {
+				console.log("Client stream received data: ", data);
+			});
+
+			binStream.on('end', function () {
+				console.log("Client stream ended.");
+			});
+
+			binStream.on('close', function () {
+				console.log("Client stream closed");
+			});
+
+			binStream.on('error', function (error) {
+				console.log("Client stream encountered an error: ", error);
+			});
+		}
+		return binStream;
+	}
+
+	function teardownStream() {
+		if (binStream === null) {
+			return;
+		}
+		binStream.end();
+		binStream = null;
+	}
+	
+	function toggleRecording(e) {
+		recordBtn.toggleClass("btn-primary btn-danger");
+		if (recording) {
+			// stop recording
+			recorder.disconnect();
+			teardownStream();
+			recording = false;
+			numStreamWrites = 0;
+			return;
+		}
+
+		if (connected) {
+			setupStream();
+			return;
+		}
+
+		// otherwise not connected or recording yet
+		console.log("Trying to make binary client to localhost 9001");
+		console.log("Looking for local connection");
+		client = new BinaryClient('ws://localhost:9001');
+		console.log("client", client);
+
+		client.on('open', function() {
+			recording = true;
+			connected = true;
+			// for the sake of this example let's put the stream in the window
+			console.log("Opening client connection");
+			setupStream();
+			
+		});
+
+		client.on('close', function () {
+			console.log("Client closed");
+		});
+
+		startGetUserMedia();
+	};
+
+	if (navigator.getUserMedia) {
+		console.log("Browser has getUserMedia");
+		recordBtn.click(toggleRecording);
+	} else {
+		console.log("Browser does not support getUserMedia");
+		alert("Browser does not support getUserMedia");
+	}
+	
+	function startGetUserMedia() {
+		navigator.getUserMedia(
+			session,
+			function(localMediaStream) {
+				// you can only have 6 instances of audioContext at a time
+				// Failed to construct 'AudioContext': number of hardware contexts reached maximum (6)
+				// var context = new audioContext();
+				var audioInput = context.createMediaStreamSource(localMediaStream);
+				console.log(audioInput);
+				var bufferSize = 2048;
+
+				// create a javascript node for recording
+				recorder = context.createScriptProcessor(bufferSize, 1, 1);
+
+				// specify the processing function
+				recorder.onaudioprocess = recorderProcess;
+				// connect the stream to our recorder
+				audioInput.connect(recorder);
+				// connect recorder to the previous destination
+				recorder.connect(context.destination);
+
+				console.log("audioInput", audioInput);
+
+				console.log("recorder", recorder);
+			},
+			function(e) { // errorCallback
+				console.log("Media access rejected.", e);
+			}
+		);
+	}
+
+	
+	// TODO: investigate whether Socket.IO or BinaryJS is better for the binary comms
+	function recorderProcess(audioProcessingEvent) {
+		// since we are recording in mono we only need the left channel
+		var left = audioProcessingEvent.inputBuffer.getChannelData(0); // PCM data samples from left channel
+		var converted = convertFloat32ToInt16(left);
+		binStream.write(converted);
+		numStreamWrites+= 1;
+		console.log("Writing %d length buffer to binary stream: %d ", converted.byteLength, numStreamWrites);
+	};
+
+	function convertFloat32ToInt16(buffer) {
+        var l = buffer.length;
+        var buf = new Int16Array(l);
+        while (l--) {
+            buf[l] = Math.min(1, buffer[l])*0x7FFF;
+        }
+        return buf.buffer;
+    };
 
 });

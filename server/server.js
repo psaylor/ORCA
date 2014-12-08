@@ -21,7 +21,7 @@ for (var dev in ifaces) {
   });
 }
 
-var DEFAULT_SAMPLE_RATE = 8 * 1000;  // 8 kHz
+var DEFAULT_SAMPLE_RATE = 16 * 1000;  // 8 kHz
 console.log("Default sample rate: " + DEFAULT_SAMPLE_RATE);
 
 var logAll = function (error, stdout, stderr) {
