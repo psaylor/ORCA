@@ -16,17 +16,23 @@ $(function() {
 	window.AudioContext = Modernizr.prefixed('AudioContext', window);
 	navigator.getUserMedia = Modernizr.prefixed('getUserMedia', navigator);
 	window.URL = Modernizr.prefixed('URL', window);
-	console.log("Creating binary client");
-	client = new BinaryClient('ws://sugar-bear.csail.mit.edu:9001');
-	console.log("Client: ", client);
-	client.on('close', function () {
-		console.log("Client closed");
-	});
 });
 
 // Remote
 $(function() {
 	console.log("Seting up context and methods");
+
+	// var hasGetUserMedia = function () {
+	// 	return !!(navigator.getUserMedia || navigator.webkitGetUserMedia ||
+	// 		navigator.mozGetUserMedia || navigator.msGetUserMedia);
+	// };
+
+	// if (hasGetUserMedia()) {
+	// 	console.log("getUserMedia present");
+	// } else {
+	// 	console.log("getUserMedia not present in your browser");
+	// 	alert('getUserMedia() is not supported in your browser');
+	// }
 
 	var audioContext =  window.AudioContext;
 	console.log("AudioContext set up", audioContext);
@@ -34,18 +40,18 @@ $(function() {
 
 	var session = {audio: true, video: false};
 
+	client = null;
 	var recorder = null;
 	var connected = false;
 	var recording = false;
-	var binStream = null;
-	var recordBtn = $("#rec-btn-1");
-	var metadata = {text: "The north wind and the sun"};
+	binStream = null;
+	var recordBtn = $("#rec-btn");
 	var numStreamWrites = 0;
 
 	function setupStream() {
 		if (binStream === null) {
 			console.log("Setting up new stream");
-			binStream = client.createStream(metadata);
+			binStream = client.createStream();
 
 			binStream.on('data', function(data) {
 				console.log("Client stream received data: ", data);
@@ -92,10 +98,33 @@ $(function() {
 			return;
 		}
 
-		console.log("Already connected to remote server. Setting up stream.");
-		setupStream();
+		if (connected) {
+			console.log("Already connected to remote server. Setting up stream.");
+			setupStream();
+			startGetUserMedia();
+			return;
+		}
+
+		// otherwise not recording yet
+		console.log("Trying to connect to remote server");
+		// client = new BinaryClient('ws://sls-apache-0.csail.mit.edu:9001');
+		// client = new BinaryClient('ws://sls-quad-27.csail.mit.edu:9001');
+		client = new BinaryClient('ws://sugar-bear.csail.mit.edu:9001');
+		
+		console.log("client", client);
+
+
+		client.on('open', function() {
+			// client doesn't maintain an open/closed boolean variable so we have to
+			connected = true;
+			console.log("Opening client connection");
+			setupStream();
+		});
+
+		client.on('close', function () {
+			console.log("Client closed");
+		});
 		startGetUserMedia();
-		return;
 	};
 
 	if (navigator.getUserMedia) {
@@ -157,6 +186,23 @@ $(function() {
         return buf.buffer;
     };
 
+
+	// var getAudioTracks = function() {
+	// 	var audioTracks = [];
+	// 	MediaStreamTrack.getSources(function(sourceInfos) {
+	// 		for (var i = 0; i < sourceInfos.length; i++) {
+	// 			var sourceInfo = sourceInfos[i];
+	// 			if (sourceInfo.kind == 'audio') {
+	// 				console.log(sourceInfo.id, sourceInfo.label || 'mic');
+	// 				audioTracks.push(sourceInfo);
+	// 			}
+	// 		}
+	// 	});
+	// 	return audioTracks;
+	// };
+
+	// audioTracks = getAudioTracks();
+
 });
 
 // Local
@@ -169,18 +215,18 @@ $(function() {
 
 	var session = {audio: true, video: false};
 
+	var client = null;
 	var recorder = null;
 	var connected = false;
 	var recording = false;
 	var binStream = null;
-	var recordBtn = $("#rec-btn-2");
-	var metadata = {text: "were disputing which was the stronger"};
+	var recordBtn = $("#rec-btn-local");
 	var numStreamWrites = 0;
 
 	function setupStream() {
 		if (binStream === null) {
 			console.log("Setting up new stream");
-			binStream = client.createStream(metadata);
+			binStream = client.createStream();
 
 			binStream.on('data', function(data) {
 				console.log("Client stream received data: ", data);
@@ -238,16 +284,16 @@ $(function() {
 		}
 
 		// otherwise not connected or recording yet
-		// console.log("Trying to make binary client to localhost 9001");
-		// console.log("Looking for local connection");
-		// client = new BinaryClient('ws://localhost:9001');
+		console.log("Trying to make binary client to localhost 9001");
+		console.log("Looking for local connection");
+		client = new BinaryClient('ws://localhost:9001');
 		console.log("client", client);
 
 		client.on('open', function() {
 			connected = true;
 			// for the sake of this example let's put the stream in the window
 			console.log("Opening client connection to local server");
-			// setupStream();
+			setupStream();
 			
 		});
 

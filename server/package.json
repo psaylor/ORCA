@@ -9,7 +9,8 @@
   "author": "Patricia Saylor",
   "license": "ISC",
   "dependencies": {
-    "binaryjs": "^0.2.1"
+    "binaryjs": "^0.2.1",
+    "sox": "^0.1.0"
   },
   "devDependencies": {},
   "repository": {

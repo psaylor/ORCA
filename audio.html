@@ -1,15 +1,17 @@
 <html>
 <head>
+  <script type="application/javascript;version=1.7"></script> <!-- Use js v 1.7 -->
   <!-- jQuery -->
-  <script src="http://code.jquery.com/jquery-1.11.0.min.js"></script>
-  <script src="http://code.jquery.com/jquery-migrate-1.2.1.min.js"></script>
-  <script src="http://code.jquery.com/ui/1.10.4/jquery-ui.min.js"></script>
+  <script src="https://code.jquery.com/jquery-1.11.0.min.js"></script>
+  <script src="https://code.jquery.com/jquery-migrate-1.2.1.min.js"></script>
+  <script src="https://code.jquery.com/ui/1.10.4/jquery-ui.min.js"></script>
   <!-- Bootstrap -->
   <link rel="stylesheet" href="//netdna.bootstrapcdn.com/bootstrap/3.1.1/css/bootstrap.min.css">
   <script src="//netdna.bootstrapcdn.com/bootstrap/3.1.1/js/bootstrap.min.js"></script>
   <!-- Other Third Party Libraries -->
   <script src="modernizr.custom.68208.js"></script>
-  <script src="http://cdn.binaryjs.com/0/binary.js"></script>
+  <!-- Copied http://cdn.binaryjs.com/0.2.1/binary.min.js into directory b/c they don't have an https cdn version -->
+  <script src="binary.min.js"></script>
   <!-- My Files -->
   <script src="audio.js"></script>
 
@@ -18,11 +20,48 @@
 <body>
   <div class="container-fluid">
     <h1>Audio Recording Demo</h1>
-    <br>
+<!--     <br>
     <button type="button" class="btn btn-primary" id="rec-btn">Record Audio Remotely</button>
     <button type="button" class="btn btn-primary" id="rec-btn-local">Record Audio Locally</button>
+    <br> -->
     <br>
-  </div>
+    <ul class="list-group">
+      
+      <li class="list-group-item"> 
+        <button type="button" class="btn btn-primary" id="rec-btn-1">
+          <span class="glyphicon glyphicon-record" aria-hidden="true"></span>
+          Record fragment
+        </button>
+
+        <div class="btn-group" role="group"> 
+          <button type="button" class="btn btn-default">The</button>
+          <button type="button" class="btn btn-default">north</button>
+          <button type="button" class="btn btn-default">wind</button>
+          <button type="button" class="btn btn-default">and</button>
+          <button type="button" class="btn btn-default">the</button>
+          <button type="button" class="btn btn-default">sun</button>
+        </div>
+      </li>
+
+      <li class="list-group-item">
+        <button type="button" class="btn btn-primary" id="rec-btn-2">
+          <span class="glyphicon glyphicon-record" aria-hidden="true"></span>
+          Record fragment
+        </button>
+
+        <div class="btn-group" role="group"> 
+          <button type="button" class="btn btn-default">were</button>
+          <button type="button" class="btn btn-default">disputing</button>
+          <button type="button" class="btn btn-default">which</button>
+          <button type="button" class="btn btn-default">was</button>
+          <button type="button" class="btn btn-default">the</button>
+          <button type="button" class="btn btn-default">stronger</button>
+        </div>
+      </li>
+    </ul>
+    
+  
+  </div> <!-- Container fluid -->
 
 </body>
 

@@ -1,0 +1,304 @@
+^Cpsaylor@sugar-bear:~/Documents/node/node-v0.10.33-linux-x64/orca_server../bin/node server_nonstreaming.js 
+Starting binary server on port 9001
+lo 127.0.0.1
+eth0 128.30.34.148
+Default sample rate: 16000
+Recording folder format: /data/sls/scratch/psaylor/recordings/%d
+Server ready...
+
+
+
+new client connection...
+Utterances from this session being saved in /data/sls/scratch/psaylor/recordings/1418671673462
+Streaming started...
+Streaming metadata:  null
+Utterances from stream 0
+Saving raw audio to file /data/sls/scratch/psaylor/recordings/1418671673462/utterance_0.raw
+Saving converted wav audio to file /data/sls/scratch/psaylor/recordings/1418671673462/utterance_0.wav
+stream data of length 4096
+stream data of length 4096
+stream data of length 4096
+stream data of length 4096
+stream data of length 4096
+stream data of length 4096
+stream data of length 4096
+stream data of length 4096
+stream data of length 4096
+stream data of length 4096
+stream data of length 4096
+stream data of length 4096
+stream data of length 4096
+stream data of length 4096
+stream data of length 4096
+stream data of length 4096
+stream data of length 4096
+stream data of length 4096
+stream data of length 4096
+stream data of length 4096
+stream data of length 4096
+stream data of length 4096
+stream data of length 4096
+stream data of length 4096
+stream data of length 4096
+stream data of length 4096
+stream data of length 4096
+stream data of length 4096
+stream data of length 4096
+stream data of length 4096
+stream data of length 4096
+stream data of length 4096
+stream data of length 4096
+stream data of length 4096
+stream data of length 4096
+stream data of length 4096
+stream data of length 4096
+stream data of length 4096
+stream data of length 4096
+stream data of length 4096
+stream data of length 4096
+stream data of length 4096
+stream data of length 4096
+stream data of length 4096
+stream data of length 4096
+stream data of length 4096
+stream data of length 4096
+stream data of length 4096
+stream data of length 4096
+stream data of length 4096
+stream data of length 4096
+stream data of length 4096
+stream data of length 4096
+stream data of length 4096
+stream data of length 4096
+stream data of length 4096
+stream data of length 4096
+stream data of length 4096
+stream data of length 4096
+stream data of length 4096
+stream data of length 4096
+stream data of length 4096
+stream data of length 4096
+stream data of length 4096
+stream data of length 4096
+stream data of length 4096
+stream data of length 4096
+stream data of length 4096
+stream data of length 4096
+stream data of length 4096
+stream data of length 4096
+stream data of length 4096
+stream data of length 4096
+stream data of length 4096
+stream data of length 4096
+stream data of length 4096
+stream data of length 4096
+stream data of length 4096
+stream data of length 4096
+stream data of length 4096
+stream data of length 4096
+Stream 0 ended.
+Raw audio: /data/sls/scratch/psaylor/recordings/1418671673462/utterance_0.raw
+Transcoding /data/sls/scratch/psaylor/recordings/1418671673462/utterance_0.raw to /data/sls/scratch/psaylor/recordings/1418671673462/utterance_0.wav
+Running recognition on utterances in /data/sls/scratch/psaylor/recordings/1418671673462
+stdout 
+stderr 
+stdout Decoding audio from /data/sls/scratch/psaylor/recordings/1418671673462
+Data preparation succeeded
+steps/make_mfcc.sh --cmd run.pl --nj 1 /data/sls/scratch/annlee/kaldi/for_trish/data/1418671673462 /data/sls/scratch/annlee/kaldi/for_trish/exp/make_mfcc/1418671673462 /data/sls/scratch/annlee/kaldi/for_trish/mfcc
+utils/validate_data_dir.sh: WARNING: you have only one speaker.  This probably a bad idea.
+   Search for the word 'bold' in http://kaldi.sourceforge.net/data_prep.html
+   for more information.
+Successfully validated data-directory /data/sls/scratch/annlee/kaldi/for_trish/data/1418671673462
+steps/make_mfcc.sh: [info]: no segments file exists: assuming wav.scp indexed by utterance.
+Succeeded creating MFCC features for 1418671673462
+steps/compute_cmvn_stats.sh /data/sls/scratch/annlee/kaldi/for_trish/data/1418671673462 /data/sls/scratch/annlee/kaldi/for_trish/exp/make_mfcc/1418671673462 /data/sls/scratch/annlee/kaldi/for_trish/mfcc
+Succeeded creating CMVN stats for 1418671673462
+local/word_align.sh /data/sls/scratch/annlee/kaldi/for_trish/data/1418671673462
+Done word-level alignment
+Done phone-level alignment
+
+stderr 
+^Cpsaylor@sugar-bear:~/Documents/node/node-v0.10.33-linux-x64/orca_server$ 
+psaylor@sugar-bear:~/Documents/node/node-v0.10.33-linux-x64/orca_server$ 
+psaylor@sugar-bear:~/Documents/node/node-v0.10.33-linux-x64/orca_server$ 
+psaylor@sugar-bear:~/Documents/node/node-v0.10.33-linux-x64/orca_server$ 
+psaylor@sugar-bear:~/Documents/node/node-v0.10.33-linux-x64/orca_server$ 
+psaylor@sugar-bear:~/Documents/node/node-v0.10.33-linux-x64/orca_server$ clear
+
+psaylor@sugar-bear:~/Documents/node/node-v0.10.33-linux-x64/orca_server$ 
+psaylor@sugar-bear:~/Documents/node/node-v0.10.33-linux-x64/orca_server$ ../bin/node server_nonstreaming.js 
+Starting binary server on port 9001
+lo 127.0.0.1
+eth0 128.30.34.148
+Default sample rate: 16000
+Recording folder format: /data/sls/scratch/psaylor/recordings/%d
+Server ready...
+
+new client connection...
+Utterances from this session being saved in /data/sls/scratch/psaylor/recordings/1418677718954
+Streaming started...
+Streaming metadata:  null
+Utterances from stream 0
+Saving raw audio to file /data/sls/scratch/psaylor/recordings/1418677718954/utterance_0.raw
+Saving converted wav audio to file /data/sls/scratch/psaylor/recordings/1418677718954/utterance_0.wav
+stream data of length 4096
+stream data of length 4096
+stream data of length 4096
+stream data of length 4096
+stream data of length 4096
+stream data of length 4096
+stream data of length 4096
+stream data of length 4096
+stream data of length 4096
+stream data of length 4096
+stream data of length 4096
+stream data of length 4096
+stream data of length 4096
+stream data of length 4096
+stream data of length 4096
+stream data of length 4096
+stream data of length 4096
+stream data of length 4096
+stream data of length 4096
+stream data of length 4096
+stream data of length 4096
+stream data of length 4096
+stream data of length 4096
+stream data of length 4096
+stream data of length 4096
+stream data of length 4096
+stream data of length 4096
+stream data of length 4096
+stream data of length 4096
+stream data of length 4096
+stream data of length 4096
+stream data of length 4096
+stream data of length 4096
+stream data of length 4096
+stream data of length 4096
+stream data of length 4096
+stream data of length 4096
+stream data of length 4096
+stream data of length 4096
+stream data of length 4096
+stream data of length 4096
+stream data of length 4096
+stream data of length 4096
+stream data of length 4096
+stream data of length 4096
+stream data of length 4096
+stream data of length 4096
+stream data of length 4096
+stream data of length 4096
+Stream 0 ended.
+Raw audio: /data/sls/scratch/psaylor/recordings/1418677718954/utterance_0.raw
+Transcoding /data/sls/scratch/psaylor/recordings/1418677718954/utterance_0.raw to /data/sls/scratch/psaylor/recordings/1418677718954/utterance_0.wav
+Running recognition on utterances in /data/sls/scratch/psaylor/recordings/1418677718954
+stdout 
+stderr 
+stdout Decoding audio from /data/sls/scratch/psaylor/recordings/1418677718954
+Data preparation succeeded
+steps/make_mfcc.sh --cmd run.pl --nj 1 /usr/users/annlee/for_trish/data/1418677718954 /usr/users/annlee/for_trish/exp/make_mfcc/1418677718954 /usr/users/annlee/for_trish/mfcc
+utils/validate_data_dir.sh: WARNING: you have only one speaker.  This probably a bad idea.
+   Search for the word 'bold' in http://kaldi.sourceforge.net/data_prep.html
+   for more information.
+Successfully validated data-directory /usr/users/annlee/for_trish/data/1418677718954
+steps/make_mfcc.sh: [info]: no segments file exists: assuming wav.scp indexed by utterance.
+Succeeded creating MFCC features for 1418677718954
+steps/compute_cmvn_stats.sh /usr/users/annlee/for_trish/data/1418677718954 /usr/users/annlee/for_trish/exp/make_mfcc/1418677718954 /usr/users/annlee/for_trish/mfcc
+Succeeded creating CMVN stats for 1418677718954
+local/word_align.sh /usr/users/annlee/for_trish/data/1418677718954
+Done word-level alignment
+Done phone-level alignment
+
+stderr ali-to-phones /usr/users/annlee/for_trish/models/mono/final.mdl 'ark:gunzip -c /usr/users/annlee/for_trish/data/1418677718954/lat/ali.phn.1.gz |' ark,t:- 
+LOG (ali-to-phones:main():ali-to-phones.cc:103) Done 1 utterances.
+ali-to-phones --write-lengths=true /usr/users/annlee/for_trish/models/mono/final.mdl 'ark:gunzip -c /usr/users/annlee/for_trish/data/1418677718954/lat/ali.phn.1.gz |' ark,t:- 
+LOG (ali-to-phones:main():ali-to-phones.cc:103) Done 1 utterances.
+
+Streaming started...
+Streaming metadata:  null
+Utterances from stream 2
+Saving raw audio to file /data/sls/scratch/psaylor/recordings/1418677718954/utterance_2.raw
+Saving converted wav audio to file /data/sls/scratch/psaylor/recordings/1418677718954/utterance_2.wav
+stream data of length 4096
+stream data of length 4096
+stream data of length 4096
+stream data of length 4096
+stream data of length 4096
+stream data of length 4096
+stream data of length 4096
+stream data of length 4096
+stream data of length 4096
+stream data of length 4096
+stream data of length 4096
+stream data of length 4096
+stream data of length 4096
+stream data of length 4096
+stream data of length 4096
+stream data of length 4096
+stream data of length 4096
+stream data of length 4096
+stream data of length 4096
+stream data of length 4096
+stream data of length 4096
+stream data of length 4096
+stream data of length 4096
+stream data of length 4096
+stream data of length 4096
+stream data of length 4096
+stream data of length 4096
+stream data of length 4096
+stream data of length 4096
+stream data of length 4096
+stream data of length 4096
+stream data of length 4096
+stream data of length 4096
+stream data of length 4096
+stream data of length 4096
+stream data of length 4096
+stream data of length 4096
+stream data of length 4096
+stream data of length 4096
+stream data of length 4096
+stream data of length 4096
+stream data of length 4096
+stream data of length 4096
+stream data of length 4096
+stream data of length 4096
+stream data of length 4096
+stream data of length 4096
+stream data of length 4096
+stream data of length 4096
+stream data of length 4096
+Stream 2 ended.
+Raw audio: /data/sls/scratch/psaylor/recordings/1418677718954/utterance_2.raw
+Transcoding /data/sls/scratch/psaylor/recordings/1418677718954/utterance_2.raw to /data/sls/scratch/psaylor/recordings/1418677718954/utterance_2.wav
+Running recognition on utterances in /data/sls/scratch/psaylor/recordings/1418677718954
+stdout 
+stderr 
+stdout Decoding audio from /data/sls/scratch/psaylor/recordings/1418677718954
+Data preparation succeeded
+steps/make_mfcc.sh --cmd run.pl --nj 1 /usr/users/annlee/for_trish/data/1418677718954 /usr/users/annlee/for_trish/exp/make_mfcc/1418677718954 /usr/users/annlee/for_trish/mfcc
+steps/make_mfcc.sh: moving /usr/users/annlee/for_trish/data/1418677718954/feats.scp to /usr/users/annlee/for_trish/data/1418677718954/.backup
+utils/validate_data_dir.sh: WARNING: you have only one speaker.  This probably a bad idea.
+   Search for the word 'bold' in http://kaldi.sourceforge.net/data_prep.html
+   for more information.
+Successfully validated data-directory /usr/users/annlee/for_trish/data/1418677718954
+steps/make_mfcc.sh: [info]: no segments file exists: assuming wav.scp indexed by utterance.
+Succeeded creating MFCC features for 1418677718954
+steps/compute_cmvn_stats.sh /usr/users/annlee/for_trish/data/1418677718954 /usr/users/annlee/for_trish/exp/make_mfcc/1418677718954 /usr/users/annlee/for_trish/mfcc
+Succeeded creating CMVN stats for 1418677718954
+local/word_align.sh /usr/users/annlee/for_trish/data/1418677718954
+Done word-level alignment
+Done phone-level alignment
+
+stderr ali-to-phones /usr/users/annlee/for_trish/models/mono/final.mdl 'ark:gunzip -c /usr/users/annlee/for_trish/data/1418677718954/lat/ali.phn.1.gz |' ark,t:- 
+LOG (ali-to-phones:main():ali-to-phones.cc:103) Done 1 utterances.
+ali.phn.1.gz and  don't match!! at local/word_boundary.pl line 21.
+
+exec error { [Error: Command failed: ali-to-phones /usr/users/annlee/for_trish/models/mono/final.mdl 'ark:gunzip -c /usr/users/annlee/for_trish/data/1418677718954/lat/ali.phn.1.gz |' ark,t:- 
+LOG (ali-to-phones:main():ali-to-phones.cc:103) Done 1 utterances.
+ali.phn.1.gz and  don't match!! at local/word_boundary.pl line 21.
+] killed: false, code: 255, signal: null }
+
