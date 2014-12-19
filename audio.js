@@ -19,17 +19,107 @@ $(function() {
 	console.log("Creating binary client");
 	client = new BinaryClient('ws://sugar-bear.csail.mit.edu:9001');
 	console.log("Client: ", client);
+	client.on('open', function () {
+		console.log("Connected open!!!!!!!");
+	});
 	client.on('close', function () {
 		console.log("Client closed");
 	});
+	audioContext =  window.AudioContext;
+	console.log("AudioContext set up", audioContext);
 });
+
+$(function() {
+	var wordBtn = $("#word-btn-1");
+	var metadata = {word: 'the', fragment: 0, index: 0, type: 'playback-request'};
+	wordBtn.click( function (e) {
+		console.log("Clicked word button: ", metadata);
+		var stream = client.createStream(metadata);
+	});
+});
+
+$(function() {
+	var wordBtn = $("#word-btn-2");
+	var metadata = {word: 'north', fragment: 0, index: 1, type: 'playback-request'};
+	wordBtn.click( function (e) {
+		console.log("Clicked word button: ", metadata);
+		var stream = client.createStream(metadata);
+	});
+});
+
+$(function() {
+	var wordBtn = $("#word-btn-3");
+	var metadata = {word: 'wind', fragment: 0, index: 2, type: 'playback-request'};
+	wordBtn.click( function (e) {
+		console.log("Clicked word button: ", metadata);
+		var stream = client.createStream(metadata);
+	});
+});
+
+$(function() {
+	var wordBtn = $("#word-btn-4");
+	var metadata = {word: 'and', fragment: 0, index: 3, type: 'playback-request'};
+	wordBtn.click( function (e) {
+		console.log("Clicked word button: ", metadata);
+		var stream = client.createStream(metadata);
+	});
+});
+
+$(function() {
+	var wordBtn = $("#word-btn-5");
+	var metadata = {word: 'the', fragment: 0, index: 4, type: 'playback-request'};
+	wordBtn.click( function (e) {
+		console.log("Clicked word button: ", metadata);
+		var stream = client.createStream(metadata);
+	});
+});
+
+$(function() {
+	var wordBtn = $("#word-btn-6");
+	var metadata = {word: 'sun', fragment: 0, index: 5, type: 'playback-request'};
+	wordBtn.click( function (e) {
+		console.log("Clicked word button: ", metadata);
+		var stream = client.createStream(metadata);
+	});
+});
+
+$(function() {
+	var context = new audioContext();
+	client.on('stream', function (stream, meta) {
+		console.log("Stream back audio from server ", meta);
+
+		stream.on('data', function (data) {
+			console.log("Streaming data from server ", data);
+			context.decodeAudioData(data, function (buffer) {
+				var source = context.createBufferSource();
+				console.log('source:', source);
+				source.buffer = buffer;
+				source.connect(context.destination);
+				source.start();
+				// if (startTime >= playedTime && startTime <= playedTime + buffer.duration) {
+				// 	console.log("allow to play");
+				// 	playedTime += buffer.duration;
+				// 	source.start(0, startTime, duration);
+				// } else {
+				// 	console.log("start time has already passed");
+				// 	playedTime += buffer.duration;
+				// }
+				
+			});
+
+		});
+
+		stream.on('end', function () {
+			console.log("Stream from server ended");
+		});
+	});
+});
+
 
 // Remote
 $(function() {
 	console.log("Seting up context and methods");
 
-	var audioContext =  window.AudioContext;
-	console.log("AudioContext set up", audioContext);
 	var context = new audioContext();
 
 	var session = {audio: true, video: false};
@@ -39,7 +129,7 @@ $(function() {
 	var recording = false;
 	var binStream = null;
 	var recordBtn = $("#rec-btn-1");
-	var metadata = {text: "The north wind and the sun"};
+	var metadata = {text: "the north wind and the sun", fragment: 1};
 	var numStreamWrites = 0;
 
 	function setupStream() {
@@ -163,8 +253,6 @@ $(function() {
 $(function() {
 	console.log("Seting up context and methods");
 
-	var audioContext =  window.AudioContext;
-	console.log("Second AudioContext set up", audioContext);
 	var context = new audioContext();
 
 	var session = {audio: true, video: false};
@@ -174,7 +262,7 @@ $(function() {
 	var recording = false;
 	var binStream = null;
 	var recordBtn = $("#rec-btn-2");
-	var metadata = {text: "were disputing which was the stronger"};
+	var metadata = {text: "were disputing which was the stronger", fragment: 2};
 	var numStreamWrites = 0;
 
 	function setupStream() {
@@ -230,32 +318,11 @@ $(function() {
 			return;
 		}
 
-		if (connected) {
-			console.log("Already connected. Setting up stream to local server.");
-			setupStream();
-			startGetUserMedia();
-			return;
-		}
-
-		// otherwise not connected or recording yet
-		// console.log("Trying to make binary client to localhost 9001");
-		// console.log("Looking for local connection");
-		// client = new BinaryClient('ws://localhost:9001');
-		console.log("client", client);
-
-		client.on('open', function() {
-			connected = true;
-			// for the sake of this example let's put the stream in the window
-			console.log("Opening client connection to local server");
-			// setupStream();
-			
-		});
-
-		client.on('close', function () {
-			console.log("Client closed");
-		});
-
+		console.log("Already connected. Setting up stream to local server.");
+		setupStream();
 		startGetUserMedia();
+		return;
+	
 	};
 
 	if (navigator.getUserMedia) {

@@ -70,11 +70,10 @@ var recognizeUtterances = function (directory, callback) {
 	});
 };
 
-var getAlignmentResults = function (results_dir) {
+var getAlignmentResults = function (results_dir, timing_data) {
 	console.log("Reading alignment results from " + results_dir);
 	var timing_filenames = fs.readdirSync(results_dir);
 	console.log("Found timing files: ", timing_filenames);
-	var timing_data = {};
 	for (i = 0; i < timing_filenames.length; i++) {
 		filename = timing_filenames[i];
 		// str.match(pattern); returns array of matches
@@ -161,6 +160,8 @@ var gen_throughTimingData = function (utterance_id, timing_data) {
 }
 
 var wordBoundary = function (word, startTime, endTime) {
+	startTime = startTime/DEFAULT_SAMPLE_RATE;
+	endTime = endTime/DEFAULT_SAMPLE_RATE;
 	var boundaryObject = {word: word, start: startTime, end: endTime};
 	return JSON.stringify(boundaryObject);
 };
@@ -229,6 +230,21 @@ var convertFileSox = function (rawFileName, saveToFileName) {
 	var command = exec(commandLine, logAll);
 };
 
+var cutFileSox = function (originalFileName, startTimeSeconds, endTimeSeconds, outputPipe) {
+	// var COMMAND_FORMAT = 'sox %s -t wav - trim %d =%d';
+	// var COMMAND_FORMAT = 'sox %s %s trim %d =%d';
+	// var commandLine = util.format(COMMAND_FORMAT, originalFileName, outputFileName, startTimeSeconds, endTimeSeconds);
+	var ABSOLUTE_TIME_FORMAT = '=%d';
+	var startTimeFormatted = util.format(ABSOLUTE_TIME_FORMAT, startTimeSeconds);
+	var endTimeFormatted = util.format(ABSOLUTE_TIME_FORMAT, endTimeSeconds);
+
+	var command = spawn('sox', [originalFileName, '-t', 'wav', '-', 'trim', startTimeFormatted, endTimeFormatted]);
+	command.on('close', function (code) {
+		console.log("Sox cut file exited with code " + code);
+	});
+	command.stdout.pipe(outputPipe);
+}
+
 server.on('connection', function (client) {
 	console.log("new client connection...");
 
@@ -237,10 +253,29 @@ server.on('connection', function (client) {
 	fs.mkdirSync(recordings_dir);
 	var timings_dir = util.format(TIMINGS_DIRECTORY_FORMAT, DATA_DIRECTORY, timestamp);
 	console.log("Utterances from this session being saved in " + recordings_dir);
+	var timing_data = {};
 
 	client.on('stream', function (stream, meta) {
 		console.log("Streaming started...");
 		console.log("Streaming metadata: ", meta);
+
+		if (meta.type === 'playback-request') {
+			// stream.write("begin streaming playback");
+			var utterance_id = meta.fragment * 2;
+			var index =  meta.index;
+			var wordBoundary = timing_data[utterance_id][index];
+			var wavFileName = util.format(WAV_FILE_NAME_FORMAT, recordings_dir, utterance_id);
+
+			
+			var response = client.createStream();
+			cutFileSox(wavFileName,wordBoundary.start, wordBoundary.end, response);
+
+			// fs.createReadStream(wavFileName).pipe(response);
+			// var trim_command = 'sox %s - trim %d %d';
+			// var trim_command = util.format(trim_command, wavFileName, wordBoundary.start, wordBoundary.end - wordBoundary.start);
+			// var comm = exec(trim_command, logAll);
+			return;
+		}
 
 		var stream_id = stream.id;
 		var stream_text = meta.text + "\n";
@@ -268,7 +303,7 @@ server.on('connection', function (client) {
 			console.log("Raw audio: " + rawFileName);
 			convertFileSox(rawFileName, wavFileName);
 			recognizeUtterances(recordings_dir, function () {
-				getAlignmentResults(timings_dir);
+				getAlignmentResults(timings_dir, timing_data);
 			});
 		});
 

@@ -3,8 +3,6 @@ ORCA
 
 Online Reading Assistant
 
-to upload: scp index.js psaylor@ftp.dialup.mit.edu:/mit/psaylor/web_scripts/ORCA
-
 
 1. try to change the audio sampling rate in the javascript code
 2. check the audio sampling rate of available data (timit data set)
@@ -35,32 +33,6 @@ sls-apache-0, web.sls runs on the cloud, node.js stuff on there already, and ssl
 killall -9 node if instance of the server seems to still be running
 
 
-Recognition stderr /usr/users/psaylor/kaldi-trunk//src/online2bin/online2-wav-nnet2-latgen-faster --do-endpointing=false --online=false --config=/usr/users/psaylor/kaldi-trunk/egs/fisher_english/s5/nnet_a_gpu_online/conf/online_nnet2_decoding.conf --max-active=7000 --beam=15.0 --lattice-beam=6.0 --acoustic-scale=0.1 --word-symbol-table=/usr/users/psaylor/kaldi-trunk/egs/fisher_english/s5/graph/words.txt /usr/users/psaylor/kaldi-trunk/egs/fisher_english/s5/nnet_a_gpu_online/smbr_epoch2.mdl /usr/users/psaylor/kaldi-trunk/egs/fisher_english/s5/graph/HCLG.fst 'ark:echo utterance-id1 utterance-id1|' 'scp:echo utterance-id1 recordings8/1414606085247.wav|' ark:/dev/null 
-LOG (online2-wav-nnet2-latgen-faster:ComputeDerivedVars():ivector-extractor.cc:180) Computing derived variables for iVector extractor
-LOG (online2-wav-nnet2-latgen-faster:ComputeDerivedVars():ivector-extractor.cc:201) Done.
-utterance-id1 well i think now it seems to be working doesn't matter that i'm on the sea sale present africa oh if you there's no fire walls 
-LOG (online2-wav-nnet2-latgen-faster:main():online2-wav-nnet2-latgen-faster.cc:252) Decoded utterance utterance-id1
-LOG (online2-wav-nnet2-latgen-faster:Print():online-timing.cc:51) Timing stats: real-time factor for offline decoding was 3.24429 = 43.3915 seconds  / 13.3748 seconds.
-LOG (online2-wav-nnet2-latgen-faster:main():online2-wav-nnet2-latgen-faster.cc:258) Decoded 1 utterances, 0 with errors.
-LOG (online2-wav-nnet2-latgen-faster:main():online2-wav-nnet2-latgen-faster.cc:260) Overall likelihood per frame was 0.185779 per frame over 1335 frames.
-
-
-
-
-
-
-ffmpeg
- ... anull            A->A       Pass the source unchanged to the output.
- ... aformat          A->A       Convert the input audio to one of the specified formats.
- ... aresample        A->A       Resample audio data.
- ... aselect          A->N       Select audio frames to pass in output.
- ... asetnsamples     A->A       Set the number of samples for each output audio frames.
- ... asetrate         A->A       Change the sample rate without altering the data.
- ... asplit           A->N       Pass on the audio input to N audio outputs.
- ... abuffer          |->A       Buffer audio frames, and make them accessible to the filterchain.
- ... abuffersink      A->|       Buffer audio frames, and make them available to the end of the filter graph.
- ... afifo            A->A       Buffer input frames and send them when they are requested.
-
 
 cat ttt.wav | ffmpeg -i pipe:0 -ar 22100 pipe:1 | cat > t4.wav
 
@@ -87,3 +59,36 @@ ffmpeg version 2.4.3 Copyright (c) 2000-2014 the FFmpeg developers
 remote ffmepg
 ffmpeg version 1.2.6-7:1.2.6-1~trusty1 Copyright (c) 2000-2014 the FFmpeg developers
   built on Apr 26 2014 18:52:58 with gcc 4.8 (Ubuntu 4.8.2-19ubuntu1)
+
+
+Cut wav file using ffmpeg
+-ss start of cut
+-t duration of cut
+ffmpeg -ss 1.34 -t 0.5 -i utterance_0.wav north.wav
+
+with sox
+	sox long.wav short.wav trim 0 10
+	sox infile outfile trim 0 10
+	play infile trim 12:34 =15:00 -2:00
+		will play from 12 minutes 34 seconds into the audio up to 15 minutes into the audio (i.e. 2 minutes and 26 seconds long), then resume playing two minutes before the end of audio.
+	All parameters can be specified using either an amount of time or an exact count of samples. The format for specifying lengths in time is hh:mm:ss.frac. The format for specifying sample counts is the number of samples with the letter ‘s’ appended to it. A value of 8000s for the first parameter will wait until 8000 samples are read before starting to process audio.
+
+
+sox my.wav −n spectrogram
+
+
+
+
+Special Filenames
+
+The following special filenames may be used in certain circumstances in place of a normal filename on the command line:
+-
+SoX can be used in simple pipeline operations by using the special filename '-' which, if used in place of an input filename, will cause SoX will read audio data from 'standard input' (stdin), and which, if used in place of the output filename, will cause SoX will send audio data to 'standard output' (stdout). Note that when using this option, the file-type (see -t below) must also be given.
+
+-p, --sox-pipe
+This can be used in place of an output filename to specify that the SoX command should be used as in input pipe to another SoX command. For example, the command:
+
+sox utterance_0.wav -t wav - trim 1.34 =1.8 | cat - >> north3.wav
+
+
+sox utterance_0.wav north4.wav trim 1.3 =1.9 fade 0.04 .56 0.04
