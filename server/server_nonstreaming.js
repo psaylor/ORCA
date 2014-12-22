@@ -260,20 +260,13 @@ server.on('connection', function (client) {
 		console.log("Streaming metadata: ", meta);
 
 		if (meta.type === 'playback-request') {
-			// stream.write("begin streaming playback");
 			var utterance_id = meta.fragment * 2;
 			var index =  meta.index;
 			var wordBoundary = timing_data[utterance_id][index];
 			var wavFileName = util.format(WAV_FILE_NAME_FORMAT, recordings_dir, utterance_id);
-
 			
 			var response = client.createStream();
 			cutFileSox(wavFileName,wordBoundary.start, wordBoundary.end, response);
-
-			// fs.createReadStream(wavFileName).pipe(response);
-			// var trim_command = 'sox %s - trim %d %d';
-			// var trim_command = util.format(trim_command, wavFileName, wordBoundary.start, wordBoundary.end - wordBoundary.start);
-			// var comm = exec(trim_command, logAll);
 			return;
 		}
 

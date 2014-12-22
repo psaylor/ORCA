@@ -30,60 +30,7 @@ $(function() {
 });
 
 $(function() {
-	var wordBtn = $("#word-btn-1");
-	var metadata = {word: 'the', fragment: 0, index: 0, type: 'playback-request'};
-	wordBtn.click( function (e) {
-		console.log("Clicked word button: ", metadata);
-		var stream = client.createStream(metadata);
-	});
-});
-
-$(function() {
-	var wordBtn = $("#word-btn-2");
-	var metadata = {word: 'north', fragment: 0, index: 1, type: 'playback-request'};
-	wordBtn.click( function (e) {
-		console.log("Clicked word button: ", metadata);
-		var stream = client.createStream(metadata);
-	});
-});
-
-$(function() {
-	var wordBtn = $("#word-btn-3");
-	var metadata = {word: 'wind', fragment: 0, index: 2, type: 'playback-request'};
-	wordBtn.click( function (e) {
-		console.log("Clicked word button: ", metadata);
-		var stream = client.createStream(metadata);
-	});
-});
-
-$(function() {
-	var wordBtn = $("#word-btn-4");
-	var metadata = {word: 'and', fragment: 0, index: 3, type: 'playback-request'};
-	wordBtn.click( function (e) {
-		console.log("Clicked word button: ", metadata);
-		var stream = client.createStream(metadata);
-	});
-});
-
-$(function() {
-	var wordBtn = $("#word-btn-5");
-	var metadata = {word: 'the', fragment: 0, index: 4, type: 'playback-request'};
-	wordBtn.click( function (e) {
-		console.log("Clicked word button: ", metadata);
-		var stream = client.createStream(metadata);
-	});
-});
-
-$(function() {
-	var wordBtn = $("#word-btn-6");
-	var metadata = {word: 'sun', fragment: 0, index: 5, type: 'playback-request'};
-	wordBtn.click( function (e) {
-		console.log("Clicked word button: ", metadata);
-		var stream = client.createStream(metadata);
-	});
-});
-
-$(function() {
+	// play any streams from the server as audio
 	var context = new audioContext();
 	client.on('stream', function (stream, meta) {
 		console.log("Stream back audio from server ", meta);
@@ -95,16 +42,7 @@ $(function() {
 				console.log('source:', source);
 				source.buffer = buffer;
 				source.connect(context.destination);
-				source.start();
-				// if (startTime >= playedTime && startTime <= playedTime + buffer.duration) {
-				// 	console.log("allow to play");
-				// 	playedTime += buffer.duration;
-				// 	source.start(0, startTime, duration);
-				// } else {
-				// 	console.log("start time has already passed");
-				// 	playedTime += buffer.duration;
-				// }
-				
+				source.start();				
 			});
 
 		});
