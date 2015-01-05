@@ -70,7 +70,7 @@ var recognizeUtterances = function (directory, callback) {
 	});
 };
 
-var getAlignmentResults = function (results_dir, timing_data) {
+var getAlignmentResults = function (results_dir, timing_data, callback) {
 	console.log("Reading alignment results from " + results_dir);
 	var timing_filenames = fs.readdirSync(results_dir);
 	console.log("Found timing files: ", timing_filenames);
@@ -87,8 +87,18 @@ var getAlignmentResults = function (results_dir, timing_data) {
 		var filePath = util.format(TIMING_PATH_FORMAT, results_dir, filename);
 		var readStream = fs.createReadStream(filePath);
 		readStream.pipe(split()).pipe(gen_throughWordBoundaries()).pipe(gen_throughTimingData(utterance_id, timing_data));
+
+		var gen_callCallback = function (utterance_id) {
+			return function() {
+				console.log("finished reading, doing callback: ", filePath);
+				callback(utterance_id);
+			};
+		};
+
+		readStream.on('end', gen_callCallback(utterance_id));
 	}
 };
+
 
 var gen_throughWordBoundaries = function () {
 	var currentWord = null;
@@ -108,12 +118,13 @@ var gen_throughWordBoundaries = function () {
 			var word = columns[3];
 
 			if (word === undefined) {
-				if (phone === 'sil') { 
-					currentWordEndTime = start;
-				} else {
+				// if (phone === 'sil') { 
+				// 	// false assumption
+				// 	currentWordEndTime = start;
+				// } else {
 					currentWordEndTime = end;
 					return;
-				}
+				// }
 			}
 
 			// emit the boundaries of the previous word if there is one
@@ -148,7 +159,7 @@ var gen_throughWordBoundaries = function () {
 	return throughWordBoundaries;
 };
 
-var gen_throughTimingData = function (utterance_id, timing_data) {
+var gen_throughTimingData = function (utterance_id, timing_data, callback) {
 
 	var throughTimingData = through (
 		function write (wordBoundary) {
@@ -260,18 +271,18 @@ server.on('connection', function (client) {
 		console.log("Streaming metadata: ", meta);
 
 		if (meta.type === 'playback-request') {
-			var utterance_id = meta.fragment * 2;
+			var utterance_id = meta.fragment;
 			var index =  meta.index;
 			var wordBoundary = timing_data[utterance_id][index];
 			var wavFileName = util.format(WAV_FILE_NAME_FORMAT, recordings_dir, utterance_id);
-			
-			var response = client.createStream();
+			var response_meta = {type: 'playback-result'};
+			var response = client.createStream(response_meta);
 			cutFileSox(wavFileName,wordBoundary.start, wordBoundary.end, response);
 			return;
 		}
 
-		var stream_id = stream.id;
-		var stream_text = meta.text + "\n";
+		var stream_id = meta.fragment;
+		var stream_text = meta.text.toLowerCase().replace(".", "") + "\n";
 		console.log("Utterances from stream " + stream_id + " for text " + stream_text);
 		
 
@@ -290,13 +301,20 @@ server.on('connection', function (client) {
 			// console.log('stream data of length %d', data.length);
 		});
 
+		var alignment_callback = function (utterance_id) {
+			console.log("Alignment callback for utterance ", utterance_id);
+			var result_meta = {type: 'timing-result', fragment: utterance_id};
+			var response = client.createStream(result_meta);
+			response.end();
+		};
+
 		stream.on('end', function() {
 			// Audio file finished streaming, convert and run ASR
 			console.log(util.format("Stream %d ended.", stream_id));
 			console.log("Raw audio: " + rawFileName);
 			convertFileSox(rawFileName, wavFileName);
 			recognizeUtterances(recordings_dir, function () {
-				getAlignmentResults(timings_dir, timing_data);
+				getAlignmentResults(timings_dir, timing_data, alignment_callback);
 			});
 		});
 
