@@ -78,9 +78,9 @@ var getAlignmentResults = function (results_dir, timing_data, callback) {
 		filename = timing_filenames[i];
 		// str.match(pattern); returns array of matches
 		// or patt.exec(str); returns the first match
-		var utterance = TIMING_FILE_NAME_PATTERN.exec(filename);
-		var utterance_id = TIMING_FILE_ID_PATTERN.exec(utterance);
-		console.log("id of " + filename + " is " + utterance_id);
+		var utterance = TIMING_FILE_NAME_PATTERN.exec(filename)[0];
+		var utterance_id = TIMING_FILE_ID_PATTERN.exec(utterance)[0];
+		console.log("id of " + filename + " is ", utterance_id);
 
 		timing_data[utterance_id] = [];
 
@@ -88,9 +88,10 @@ var getAlignmentResults = function (results_dir, timing_data, callback) {
 		var readStream = fs.createReadStream(filePath);
 		readStream.pipe(split()).pipe(gen_throughWordBoundaries()).pipe(gen_throughTimingData(utterance_id, timing_data));
 
+
 		var gen_callCallback = function (utterance_id) {
 			return function() {
-				console.log("finished reading, doing callback: ", filePath);
+				console.log("finished reading, doing callback: ", filePath, utterance_id);
 				callback(utterance_id);
 			};
 		};
