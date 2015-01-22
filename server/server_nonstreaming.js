@@ -179,58 +179,6 @@ var wordBoundary = function (word, startTime, endTime) {
 };
 // { word: north, start: 12960, end:17600 }
 
-/** 
-	Converts a 44.1kHz raw audio file to a 16kHz wav file
-**/
-var convertFile = function (rawFileName, saveToFileName) {
-	var command = ffmpeg()
-					.input(rawFileName)
-					.inputFormat('s16le')
-					.inputOptions([
-						'-acodec pcm_s16le',
-						'-ac 1',
-						])
-					.audioCodec('pcm_s32le')
-					.audioChannels(1)
-					.audioFrequency(DEFAULT_SAMPLE_RATE)
-					.outputFormat('s32le');
-
-	var wavFileWriter = new wav.FileWriter(saveToFileName, {
-	    channels: 1,
-	    sampleRate: DEFAULT_SAMPLE_RATE,
-	    bitDepth: 16
-	});
-			
-	command.on('start', function(commandLine) {
-		console.log("Spawned Ffmpeg with command " + commandLine);
-	});
-	command.on('codecData', function(data) {
-	    console.log('Input is ' + data.audio + ' audio with ' + data.video + ' video');
-	    console.log('Input is ' + data.format + ' and ' + data.audio_details);
-		});
-		command.on('progress', function(progress) {
-	    console.log('Processing progress: ', progress);
-	});
-	command.on('error', function(err, stdout, stderr) {
-	    console.log('Cannot process audio: ' + err.message);
-	    console.log("Command Stdout: ", stdout);
-	    console.log("Command Stderr: ", stderr)
-	});
-	command.on('end', function() {
-	    console.log('Transcoding succeeded !');
-	    // delete raw file
-	    // fs.unlink(rawFileName, function (err) {
-	    // 	if (err) {
-	    // 		console.log("Error removing raw file: ", err);
-	    // 	} else {
-	    // 		console.log("Raw file removed: " + rawFileName);
-	    // 	}
-	    // });
-
-	});
-	// seem to need to write it with wavfilewriter; ffmpeg doesn't write the file properly, even if not streaming
-	command.pipe(wavFileWriter, {end: true});
-};
 
 /** 
 	Converts a 44.1kHz raw audio file to a 16kHz wav file using Sox
@@ -272,13 +220,28 @@ server.on('connection', function (client) {
 		console.log("Streaming metadata: ", meta);
 
 		if (meta.type === 'playback-request') {
-			var utterance_id = meta.fragment;
-			var index =  meta.index;
-			var wordBoundary = timing_data[utterance_id][index];
-			var wavFileName = util.format(WAV_FILE_NAME_FORMAT, recordings_dir, utterance_id);
-			var response_meta = {type: 'playback-result'};
+			var start_utterance = meta.start_fragment;
+			var start_index =  meta.start_index;
+			var end_utterance = meta.end_fragment;
+			var end_index = meta.end_index;
+			var startWordBoundary = timing_data[start_utterance][start_index];
+			var endWordBoundary = timing_data[end_utterance][end_index];
+			if (start_utterance !== end_utterance) {
+				var lastIndex = timing_data[start_utterance].length - 1;
+				endWordBoundary = timing_data[start_utterance][lastIndex];
+			}
+			console.log("startWordBoundary: ", startWordBoundary);
+			console.log("endWordBoundary: ", endWordBoundary);
+
+			// var wavFileNameList = [];
+			// for (var id = start_utterance; id <= end_utterance; id++) {
+			// 	var wavFileName = util.format(WAV_FILE_NAME_FORMAT, recordings_dir, id);
+			// 	wavFileNameList.push(wavFileName);
+			// }
+			var wavFileName = util.format(WAV_FILE_NAME_FORMAT, recordings_dir, start_utterance);
+			var response_meta = {type: 'playback-result', first_word: startWordBoundary.word, last_word: endWordBoundary.word};
 			var response = client.createStream(response_meta);
-			cutFileSox(wavFileName,wordBoundary.start, wordBoundary.end, response);
+			cutFileSox(wavFileName, startWordBoundary.start, endWordBoundary.end, response);
 			return;
 		}
 

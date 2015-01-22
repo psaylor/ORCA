@@ -44,7 +44,7 @@ $(function() {
 	client.on('stream', function (stream, meta) {
 		console.log("Stream from server ", meta);
 		if (meta.type === 'playback-result') {
-			console.log("Audio stream from server");
+			console.log("Audio stream from server", meta);
 			stream.on('data', function (data) {
 				console.log("Streaming data from server ", data);
 				context.decodeAudioData(data, function (buffer) {
@@ -112,23 +112,39 @@ $(function() {
 			if (userSelection.type !== "Range") {
 				return;
 			}
+
 			range = userSelection.getRangeAt(0);
 			console.log("range: ", range);
 			rangeStart = $(range.startContainer.parentElement);
-			rangeEnd = $(range.endContainer.parentElement);
-			var playbackFragment = rangeStart.data("fragment");
-			var playbackStartIndex = rangeStart.data("index");
-			var playbackEndIndex = rangeEnd.data("index");
-			if (rangeEnd.data("fragment") !== playbackFragment) {
-				playbackEndIndex = -1;
+			if (rangeStart.data("index") === undefined) {
+				rangeStart = $(range.startContainer.nextElementSibling);
 			}
-			if (rangeStart.data("enabled")) {
+			rangeEnd = $(range.endContainer.parentElement);
+			if (rangeEnd.data("index") === undefined) {
+				rangeEnd = $(range.endContainer.previousElementSibling);
+			}
+			console.log("rangeStart", rangeStart);
+			console.log("rangeEnd", rangeEnd);
+
+			var playbackRequestMetadata = {
+				type: 'playback-request',
+				start_fragment: rangeStart.data("fragment"),
+				start_index: rangeStart.data("index"),
+				end_fragment: rangeEnd.data("fragment"),
+				end_index: rangeEnd.data("index"),
+			};
+
+			console.log("User selected: " + range.toString(), playbackRequestMetadata);
+
+			if (rangeStart.data("enabled") && rangeEnd.data("enabled")) {
 				console.log("Playback is enabled");
+				client.createStream(playbackRequestMetadata);
+
 			} else {
 				console.log("Playback is not yet ready");
 			}
-			alert("User selected: " + range.toString() + "\nFragment: " + playbackFragment + " Start: " + playbackStartIndex + " End: " + playbackEndIndex);
 
+			
 			
 		});
 		
@@ -293,16 +309,21 @@ $(function() {
 		prepareReadableDisplay({title: title, content: content});
 	});
 
-	var gen_wordButtonListener = function (btn, frag, ind, word) {
+	var gen_wordButtonListener = function (btn, frag, ind) {
 		return function requestPlayback (e) {
 			if (btn.data("enabled")) {
-				var metadata = {word: word, fragment: frag, index: ind, type: 'playback-request'};
+				var metadata = {
+					type: 'playback-request',
+					start_fragment: frag,
+					start_index: ind,
+					end_fragment: frag,
+					end_index: ind,
+				};
 				console.log("Clicked word button: ", metadata);
 				client.createStream(metadata);
 			} else {
 				console.log("Clicked disabled word button");
-			}
-			
+			}	
 		};
 	}
 
@@ -335,7 +356,7 @@ $(function() {
 				wordButton.attr("data-fragment", i);
 				wordButton.data("enabled", false);
 				wordButton.data("index", j);
-				wordButton.click(gen_wordButtonListener(wordButton, i, j, phrases[j]));
+				wordButton.click(gen_wordButtonListener(wordButton, i, j));
 				lineElement.append(wordButton);
 				lineElement.append(" ");
 			}
