@@ -45,14 +45,33 @@ $(function() {
 		console.log("Stream from server ", meta);
 		if (meta.type === 'playback-result') {
 			console.log("Audio stream from server", meta);
+			var audioDataArray = [];
+
 			stream.on('data', function (data) {
 				console.log("Streaming data from server ", data);
-				context.decodeAudioData(data, function (buffer) {
+				audioDataArray.push(data);
+			});
+
+			stream.on('end', function () {
+				console.log("Streaming audio playback ended", audioDataArray);
+				var totalBufferByteLength = 0;
+				for (var i = 0; i < audioDataArray.length; i++) {
+					totalBufferByteLength += audioDataArray[i].byteLength;
+				}
+				console.log("totalBufferByteLength: ", totalBufferByteLength);
+				audioDataBuffer = new Uint8Array(totalBufferByteLength);
+				var bufferByteOffset = 0;
+				for (var j = 0; j < audioDataArray.length; j++) {
+					var typedArray = new Uint8Array(audioDataArray[j]);
+					audioDataBuffer.set(typedArray, bufferByteOffset);
+					bufferByteOffset += typedArray.byteLength;
+				}
+				context.decodeAudioData(audioDataBuffer.buffer, function (buffer) {
+					console.log("Concatenated buffer from streams ", buffer);
 					var source = context.createBufferSource();
-					console.log('source:', source);
 					source.buffer = buffer;
 					source.connect(context.destination);
-					source.start();				
+					source.start();
 				});
 
 			});
