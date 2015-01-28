@@ -41,6 +41,15 @@ $(function() {
 $(function() {
 	// play any streams from the server as audio
 	var context = new audioContext();
+
+	var clearSelection = function () {
+		if (window.getSelection) {
+			window.getSelection().removeAllRanges();
+		} else if (document.selection) {
+			document.selection.empty();
+		}
+	};
+
 	client.on('stream', function (stream, meta) {
 		console.log("Stream from server ", meta);
 		if (meta.type === 'playback-result') {
@@ -53,7 +62,7 @@ $(function() {
 			});
 
 			stream.on('end', function () {
-				console.log("Streaming audio playback ended", audioDataArray);
+				console.log("End of streamed audio", audioDataArray);
 				var totalBufferByteLength = 0;
 				for (var i = 0; i < audioDataArray.length; i++) {
 					totalBufferByteLength += audioDataArray[i].byteLength;
@@ -97,6 +106,53 @@ $(function() {
 	var context = new audioContext();
 
 	var session = {audio: true, video: false};
+	var audioInput = null;
+
+	var getAverageVolume = function (typedArray) {
+		var values = 0;
+		var average;
+		var length = typedArray.length;
+		for (var i = 0; i < length; i++) {
+			values += typedArray[i];
+		}
+		average = values / length;
+		return average;
+	};
+
+	var setupAudioNodes= function () {
+		// called whenever the 2048 frames have been sampled, approx 21 times a second
+		javascriptNode = context.createScriptProcessor(2048, 1, 1);
+		javascriptNode.connect(context.destination);
+		javascriptNode.onaudioprocess = function () {
+			var array = new Uint8Array(analyser.frequencyBinCount);
+			analyser.getByteFrequencyData(array);
+			var average = getAverageVolume(array);
+			// TODO: update the UI
+			// console.log("Average volume: ", average);
+			var scaled_average_volume = (2 * (average + 50)) % 255;
+			// console.log("Scaled average volume ", scaled_average_volume);
+			$("#mic-icon").css("color", "rgb(0,"+ scaled_average_volume +",50)");
+			$("#avg").text(""+average);
+		};
+
+		var analyser = context.createAnalyser();
+		analyser.smoothingTimeConstant = 0.3;
+		analyser.fftSize = 1024;
+
+		navigator.getUserMedia(
+			session,
+			function(localMediaStream) {
+				audioInput = context.createMediaStreamSource(localMediaStream);
+
+				audioInput.connect(analyser);
+				analyser.connect(javascriptNode);
+				javascriptNode.connect(context.destination);
+			},
+			function(e) { // errorCallback
+				console.log("Media access rejected.", e);
+			}
+		);
+	};
 	
 	var convertFloat32ToInt16 = function (buffer) {
         var l = buffer.length;
@@ -112,6 +168,14 @@ $(function() {
 		var storyLines = $(".readable-fragment");
 		addTextSelectListeners();
 		recordButtonSetup(recordButton, storyLines);
+	};
+
+	var clearSelection = function () {
+		if (window.getSelection) {
+			window.getSelection().removeAllRanges();
+		} else if (document.selection) {
+			document.selection.empty();
+		}
 	};
 
 	var addTextSelectListeners = function () {
@@ -162,12 +226,14 @@ $(function() {
 			} else {
 				console.log("Playback is not yet ready");
 			}
+		});
 
-			
-			
+		content.on('mousedown', function (e) {
+			clearSelection();
 		});
 		
 	};
+
 
 	var recordButtonSetup = function (recordBtn, fragmentElements) {
 		console.log("Setting up record button", recordBtn, fragmentElements);
@@ -230,6 +296,25 @@ $(function() {
 		};
 
 		var startGetUserMedia = function () {
+			if (audioInput !== null) {
+				console.log("Audio input already created");
+				var bufferSize = 2048;
+
+				// create a javascript node for recording
+				recorder = context.createScriptProcessor(bufferSize, 1, 1);
+
+				// specify the processing function
+				recorder.onaudioprocess = recorderProcess;
+				// connect the stream to our recorder
+				audioInput.connect(recorder);
+				// connect recorder to the previous destination
+				recorder.connect(context.destination);
+
+				console.log("audioInput", audioInput);
+
+				console.log("Connected recorder", recorder);
+				return;
+			}
 			navigator.getUserMedia(
 				session,
 				function(localMediaStream) {
@@ -298,6 +383,7 @@ $(function() {
 			return;
 		};
 
+		setupAudioNodes();
 		$(recordBtn).click(toggleRecording);
 		$(recordBtn).hover(
 			function hoverIn(e) {

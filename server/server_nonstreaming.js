@@ -205,6 +205,21 @@ var cutFileSox = function (originalFileName, startTimeSeconds, endTimeSeconds, o
 	command.stdout.pipe(outputPipe);
 }
 
+var concatFileSox = function (fileNameList, startTimeSeconds, endTimeSeconds, outputFileName, outputPipe) {
+	var ABSOLUTE_TIME_FORMAT = '=%d';
+	var startTimeFormatted = util.format(ABSOLUTE_TIME_FORMAT, startTimeSeconds);
+	var endTimeFormatted = util.format(ABSOLUTE_TIME_FORMAT, endTimeSeconds);
+
+	var commandArgs = fileNameList.concat([outputFileName]);
+
+	var command = spawn('sox', commandArgs);
+	command.on('close', function (code) {
+		console.log("Sox concat files exited with code " + code);
+		fs.createReadStream(outputFileName).pipe(outputPipe);
+	});
+	// command.stdout.pipe(outputPipe);
+};
+
 server.on('connection', function (client) {
 	console.log("new client connection...");
 
@@ -226,22 +241,33 @@ server.on('connection', function (client) {
 			var end_index = meta.end_index;
 			var startWordBoundary = timing_data[start_utterance][start_index];
 			var endWordBoundary = timing_data[end_utterance][end_index];
-			if (start_utterance !== end_utterance) {
-				var lastIndex = timing_data[start_utterance].length - 1;
-				endWordBoundary = timing_data[start_utterance][lastIndex];
-			}
 			console.log("startWordBoundary: ", startWordBoundary);
 			console.log("endWordBoundary: ", endWordBoundary);
+			if (start_utterance !== end_utterance) {
+				console.log("Requested playback spanning multiple utterances");
+				// var lastIndex = timing_data[start_utterance].length - 1;
+				// endWordBoundary = timing_data[start_utterance][lastIndex];
 
-			// var wavFileNameList = [];
-			// for (var id = start_utterance; id <= end_utterance; id++) {
-			// 	var wavFileName = util.format(WAV_FILE_NAME_FORMAT, recordings_dir, id);
-			// 	wavFileNameList.push(wavFileName);
-			// }
-			var wavFileName = util.format(WAV_FILE_NAME_FORMAT, recordings_dir, start_utterance);
-			var response_meta = {type: 'playback-result', first_word: startWordBoundary.word, last_word: endWordBoundary.word};
-			var response = client.createStream(response_meta);
-			cutFileSox(wavFileName, startWordBoundary.start, endWordBoundary.end, response);
+				var wavFileNameList = [];
+				for (var id = start_utterance; id <= end_utterance; id++) {
+					var wavFileName = util.format(WAV_FILE_NAME_FORMAT, recordings_dir, id);
+					wavFileNameList.push(wavFileName);
+				}
+				var response_meta = {type: 'playback-result', first_word: startWordBoundary.word, last_word: endWordBoundary.word};
+				var response = client.createStream(response_meta);
+				var outputFileName = recordings_dir + '/output_' + start_utterance + '_' + end_utterance + '.wav';
+				concatFileSox(wavFileNameList, startWordBoundary.start, endWordBoundary.end, outputFileName, response);
+
+			} else { // within a single utterance recording
+				console.log("Requested playback within one utterance");
+
+				var wavFileName = util.format(WAV_FILE_NAME_FORMAT, recordings_dir, start_utterance);
+				var response_meta = {type: 'playback-result', first_word: startWordBoundary.word, last_word: endWordBoundary.word};
+				var response = client.createStream(response_meta);
+				cutFileSox(wavFileName, startWordBoundary.start, endWordBoundary.end, response);
+
+			}
+			
 			return;
 		}
 
