@@ -127,11 +127,11 @@ $(function() {
 			var array = new Uint8Array(analyser.frequencyBinCount);
 			analyser.getByteFrequencyData(array);
 			var average = getAverageVolume(array);
-			// TODO: update the UI
-			// console.log("Average volume: ", average);
-			var scaled_average_volume = (2 * (average + 50)) % 255;
-			// console.log("Scaled average volume ", scaled_average_volume);
-			$("#mic-icon").css("color", "rgb(0,"+ scaled_average_volume +",50)");
+			var bgWebKit = "-webkit-gradient(linear, left bottom, left top, color-stop(" + (average/100).toFixed(2) + ", rgb(14, 145, 19)), color-stop(.8, rgb(170, 227, 172)), color-stop(1, white))";
+			$("#mic-icon").css("background", bgWebKit)
+				.css("-webkit-background-clip", "text")
+				.css("-webkit-text-fill-color", "transparent");
+				// .css("background", other-browser-specific gradient shit)
 			$("#avg").text(""+average);
 		};
 

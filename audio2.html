@@ -16,7 +16,31 @@
   <!-- My Files -->
   <script src="audio2.js"></script>
   <link rel="stylesheet" src="audio_demo.css">
+  <style type="text/css">
+    .dynamic2 {
+      
+      background: white;
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+    .other {
+      background: linear-gradient(330deg, #e05252 0%, #99e052 25%, #52e0e0 50%, #9952e0 75%, #e05252 100%);
+      background: -webkit-gradient(
+        linear, 
+        left top, 
+        left bottom, 
+        color-stop(0.53, rgb(14, 145, 19)), 
+        color-stop(1, rgb(170, 227, 172))
+      );
   
+
+      background: -webkit-linear-gradient(green, white); /* For Safari 5.1 to 6.0 */
+      background: -o-linear-gradient(green, white); /* For Opera 11.1 to 12.0 */
+      background: -moz-linear-gradient(green, white); /* For Firefox 3.6 to 15 */
+      background: linear-gradient(green, white); /* Standard syntax */
+    }
+
+  </style>
 
 </head>
 
@@ -29,10 +53,10 @@
 
     </p>
     <button type="button" class="btn btn-primary btn-lg" id="rec-btn">
-		<i class="fa fa-microphone fa-2x" id="ø"></i>
+		<i class="fa fa-microphone fa-2x dynamic" id="mic-icon"></i>
 		Record next fragment
 	</button> 
-  <h3 id='avg'></h3>
+  <br>
   
   </div> <!-- Container fluid -->
 

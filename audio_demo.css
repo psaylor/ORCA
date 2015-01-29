@@ -1,7 +1,54 @@
-span .readable-fragment {
 
+.dynamic-mic {
+	display: table;
+	margin: 0 auto;
+	font-family: "Roboto Slab";
+	font-weight: 400;
+	font-size: 6em;
+	background: linear-gradient(330deg, #e05252 0%, #99e052 25%, #52e0e0 50%, #9952e0 75%, #e05252 100%);
+	-webkit-background-clip: text;
+	-webkit-text-fill-color: transparent;
+	line-height: 200px;
 }
 
-span .current-fragment {
-	
+h1 {
+	background-image: -webkit-gradient(
+	linear, 
+	left top, left bottom, 
+	from(rgba(0, 0, 0, 1)), 
+	to(rgba(0, 0, 255, 1))
+	);
+	-webkit-background-clip: text;
+	-webkit-text-fill-color: transparent;
+};
+
+/* --- start of magic ;-) --- */
+.white-gradient {
+	position: relative;
+}
+.white-gradient:after {
+	content: '';
+	display: block;
+	position: absolute;
+	top: 0;
+	left: 0;
+	height: 100%;
+	width: 100%;
+	filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#ffffff', endColorstr='#00ffffff',GradientType=0 );
+	background: -webkit-gradient(linear, left top, left bottom, color-stop(0%, rgba(255,255,255,1)), color-stop(100%, rgba(255,255,255,0)));
+	background: -webkit-linear-gradient(top, rgba(255,255,255,1) 0%,rgba(255,255,255,0) 100%);
+	background:    -moz-linear-gradient(top, rgba(255,255,255,1) 0%, rgba(255,255,255,0) 100%);
+	background:     -ms-linear-gradient(top, rgba(255,255,255,1) 0%, rgba(255,255,255,0) 100%);
+	background:      -o-linear-gradient(top, rgba(255,255,255,1) 0%, rgba(255,255,255,0) 100%);
+	background:         linear-gradient(top, rgba(255,255,255,1) 0%, rgba(255,255,255,0) 100%);
+}
+
+.white {
+	filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#ffffff', endColorstr='#00ffffff',GradientType=0 );
+	background: -webkit-gradient(linear, left top, left bottom, color-stop(0%, rgba(255,255,255,1)), color-stop(100%, rgba(255,255,255,0)));
+	background: -webkit-linear-gradient(top, rgba(255,255,255,1) 0%,rgba(255,255,255,0) 100%);
+	background:    -moz-linear-gradient(top, rgba(255,255,255,1) 0%, rgba(255,255,255,0) 100%);
+	background:     -ms-linear-gradient(top, rgba(255,255,255,1) 0%, rgba(255,255,255,0) 100%);
+	background:      -o-linear-gradient(top, rgba(255,255,255,1) 0%, rgba(255,255,255,0) 100%);
+	background:         linear-gradient(top, rgba(255,255,255,1) 0%, rgba(255,255,255,0) 100%);
 }

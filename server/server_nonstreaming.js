@@ -209,15 +209,31 @@ var concatFileSox = function (fileNameList, startTimeSeconds, endTimeSeconds, ou
 	var ABSOLUTE_TIME_FORMAT = '=%d';
 	var startTimeFormatted = util.format(ABSOLUTE_TIME_FORMAT, startTimeSeconds);
 	var endTimeFormatted = util.format(ABSOLUTE_TIME_FORMAT, endTimeSeconds);
+	console.log('startTimeSeconds', startTimeSeconds, startTimeFormatted);
+	console.log("endTimeSeconds", endTimeSeconds, endTimeFormatted);
 
-	var commandArgs = fileNameList.concat([outputFileName]);
+	/*
+	Command line example of what we need to do
+	sox --combine concatenate "|sox first_file.wav -t wav - trim =3.9"  middle_file.wav "|sox last_file.wav -t wav - trim 0 =2.67" output.wav 
+	*/
 
+	var firstFileCommand = util.format('|sox %s -t wav - trim %s', fileNameList[0], startTimeFormatted);
+	var lastFileCommand = util.format('|sox %s -t wav - trim 0 %s', fileNameList[fileNameList.length - 1], endTimeFormatted);
+	console.log("firstFileCommand", firstFileCommand);
+	console.log("lastFileCommand", lastFileCommand);
+
+	var commandArgs = ['--combine', 'concatenate', firstFileCommand]
+		.concat(fileNameList.slice(1, -1))
+		.concat([lastFileCommand, outputFileName]);
+	console.log("commandArgs", commandArgs);
+	
 	var command = spawn('sox', commandArgs);
 	command.on('close', function (code) {
 		console.log("Sox concat files exited with code " + code);
-		fs.createReadStream(outputFileName).pipe(outputPipe);
+		if (code == 0) {  // success
+			fs.createReadStream(outputFileName).pipe(outputPipe);
+		}
 	});
-	// command.stdout.pipe(outputPipe);
 };
 
 server.on('connection', function (client) {
@@ -235,6 +251,9 @@ server.on('connection', function (client) {
 		console.log("Streaming metadata: ", meta);
 
 		if (meta.type === 'playback-request') {
+			// var testPipe = client.createStream({type: 'playback-result'});
+			// testConcatFileSox(testPipe);
+			// return;
 			var start_utterance = meta.start_fragment;
 			var start_index =  meta.start_index;
 			var end_utterance = meta.end_fragment;
