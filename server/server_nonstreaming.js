@@ -1,6 +1,7 @@
 var binaryServer = require('binaryjs').BinaryServer;
 var wav = require('wav');
 var exec = require('child_process').exec;
+var execFile = require('child_process').execFile;
 var spawn = require('child_process').spawn;
 var os = require('os');
 var ffmpeg = require('fluent-ffmpeg');
@@ -27,19 +28,16 @@ for (var dev in ifaces) {
 var DEFAULT_SAMPLE_RATE = 16 * 1000;  // 16 kHz
 // %d is for the recording timestamp
 var RECORDINGS_DIRECTORY_FORMAT = '/data/sls/scratch/psaylor/recordings/%d';
-// var RECORDINGS_DIRECTORY_FORMAT = 'recordings/%d';
 
 // %d is for a number unique to each utterance within the same session
 var RAW_FILE_NAME_FORMAT = '%s/utterance_%d.raw';
 var WAV_FILE_NAME_FORMAT = '%s/utterance_%d.wav';
 var TXT_FILE_NAME_FORMAT = '%s/utterance_%d.txt';
 
-var DATA_DIRECTORY = '/usr/users/annlee/for_trish/data'
-// var DATA_DIRECTORY = 'data'
-var TIMINGS_DIRECTORY_FORMAT = '%s/%d/time';
+var DATA_DIRECTORY_FORMAT = '/data/sls/scratch/psaylor/data/%d';
+var TIMINGS_DIRECTORY_FORMAT = '%s/time/';
 // first and second %d are speaker, which is timestamp
 // third %d is utterance number
-// var OUTPUT_TIMING_FILE_NAME_FORMAT = '%s/%d/time/%d_utterance_%d.txt';
 var TIMING_FILE_NAME_PATTERN = /utterance_\d+(?=.txt)/;
 var TIMING_FILE_ID_PATTERN = /\d+/;
 var TIMING_PATH_FORMAT = '%s/%s';
@@ -55,19 +53,19 @@ var logAll = function (error, stdout, stderr) {
 	}
 };
 
-var recognizeUtterances = function (directory, callback) {
-	// var child = execFile(file, [args], [options], [callback]);
-	console.log("Running recognition on utterances in " + directory);
-	var recognize = exec('./call_script.sh ' + directory, 
+var recognizeUtterances = function (utteranceWavFile, utteranceTxtFile, dataOutputDir, callback) {
+	console.log("Running recognition on ", utteranceWavFile, utteranceTxtFile, "\nOutput data to", dataOutputDir);
+	var child = exec('./call_script.sh', 
+		[utteranceWavFile, utteranceTxtFile, dataOutputDir], 
+		{},
 		function (error, stdout, stderr) {
 			console.log('Recognition stdout', stdout);
-			console.log('Recognition', typeof(stdout), typeof(stderr));
 			console.log('Recognition stderr', stderr);
 			if (error !== null) {
 				console.log('Recognition exec error', error);
 			}
 			callback();
-	});
+		});
 };
 
 var getAlignmentResults = function (results_dir, timing_data, callback) {
@@ -81,6 +79,11 @@ var getAlignmentResults = function (results_dir, timing_data, callback) {
 		var utterance = TIMING_FILE_NAME_PATTERN.exec(filename)[0];
 		var utterance_id = TIMING_FILE_ID_PATTERN.exec(utterance)[0];
 		console.log("id of " + filename + " is ", utterance_id);
+
+		if (timing_data[utterance_id]) {
+			console.log("Timing results of", utterance_id, "already processed");
+			continue;
+		}
 
 		timing_data[utterance_id] = [];
 
@@ -242,7 +245,8 @@ server.on('connection', function (client) {
 	var timestamp = new Date().getTime();
 	var recordings_dir = util.format(RECORDINGS_DIRECTORY_FORMAT, timestamp);
 	fs.mkdirSync(recordings_dir);
-	var timings_dir = util.format(TIMINGS_DIRECTORY_FORMAT, DATA_DIRECTORY, timestamp);
+	var data_output_dir = util.format(DATA_DIRECTORY_FORMAT, timestamp);
+	var timings_dir = util.format(TIMINGS_DIRECTORY_FORMAT, data_output_dir);
 	console.log("Utterances from this session being saved in " + recordings_dir);
 	var timing_data = {};
 
@@ -264,8 +268,6 @@ server.on('connection', function (client) {
 			console.log("endWordBoundary: ", endWordBoundary);
 			if (start_utterance !== end_utterance) {
 				console.log("Requested playback spanning multiple utterances");
-				// var lastIndex = timing_data[start_utterance].length - 1;
-				// endWordBoundary = timing_data[start_utterance][lastIndex];
 
 				var wavFileNameList = [];
 				for (var id = start_utterance; id <= end_utterance; id++) {
@@ -306,6 +308,7 @@ server.on('connection', function (client) {
 		// text file must end in newline
 		fs.writeFileSync(txtFileName, stream_text);
 
+
 		stream.on('data', function(data) {
 			// console.log('stream data of length %d', data.length);
 		});
@@ -322,7 +325,7 @@ server.on('connection', function (client) {
 			console.log(util.format("Stream %d ended.", stream_id));
 			console.log("Raw audio: " + rawFileName);
 			convertFileSox(rawFileName, wavFileName);
-			recognizeUtterances(recordings_dir, function () {
+			recognizeUtterances(wavFileName, txtFileName, data_output_dir, function () {
 				getAlignmentResults(timings_dir, timing_data, alignment_callback);
 			});
 		});

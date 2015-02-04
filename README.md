@@ -92,3 +92,5 @@ sox utterance_0.wav -t wav - trim 1.34 =1.8 | cat - >> north3.wav
 
 
 sox utterance_0.wav north4.wav trim 1.3 =1.9 fade 0.04 .56 0.04
+
+should i use MEAN stack? MongoDB, Express.js, Angular.js, Node.js?
