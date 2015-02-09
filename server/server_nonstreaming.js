@@ -55,9 +55,8 @@ var logAll = function (error, stdout, stderr) {
 
 var recognizeUtterances = function (utteranceWavFile, utteranceTxtFile, dataOutputDir, callback) {
 	console.log("Running recognition on ", utteranceWavFile, utteranceTxtFile, "\nOutput data to", dataOutputDir);
-	var child = exec('./call_script.sh', 
-		[utteranceWavFile, utteranceTxtFile, dataOutputDir], 
-		{},
+	var command = ['./call_script.sh', utteranceWavFile, utteranceTxtFile, dataOutputDir].join(' ');
+	var child = exec(command,
 		function (error, stdout, stderr) {
 			console.log('Recognition stdout', stdout);
 			console.log('Recognition stderr', stderr);
