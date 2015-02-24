@@ -1,0 +1,102 @@
+<html>
+<head>
+  <script type="application/javascript;version=1.7"></script> <!-- Use js v 1.7 -->
+  <!-- jQuery -->
+  <script src="https://code.jquery.com/jquery-1.11.0.min.js"></script>
+  <script src="https://code.jquery.com/jquery-migrate-1.2.1.min.js"></script>
+  <script src="https://code.jquery.com/ui/1.10.4/jquery-ui.min.js"></script>
+  <!-- Bootstrap -->
+  <link rel="stylesheet" href="//netdna.bootstrapcdn.com/bootstrap/3.1.1/css/bootstrap.min.css">
+  <link rel="stylesheet" href="//maxcdn.bootstrapcdn.com/font-awesome/4.2.0/css/font-awesome.min.css">
+  <script src="//netdna.bootstrapcdn.com/bootstrap/3.1.1/js/bootstrap.min.js"></script>
+  <!-- Other Third Party Libraries -->
+  <script src="modernizr.custom.68208.js"></script>
+  <!-- Copied http://cdn.binaryjs.com/0.2.1/binary.min.js into directory b/c they don't have an https cdn version -->
+  <script src="binary.min.js"></script>
+  <!-- My Files -->
+  <script src="audio2.js"></script>
+  <style type="text/css">
+    .dynamic2 {
+      
+      background: white;
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+    .other {
+      background: linear-gradient(330deg, #e05252 0%, #99e052 25%, #52e0e0 50%, #9952e0 75%, #e05252 100%);
+      background: -webkit-gradient(
+        linear, 
+        left top, 
+        left bottom, 
+        color-stop(0.53, rgb(14, 145, 19)), 
+        color-stop(1, rgb(170, 227, 172))
+      );
+  
+
+      background: -webkit-linear-gradient(green, white); /* For Safari 5.1 to 6.0 */
+      background: -o-linear-gradient(green, white); /* For Opera 11.1 to 12.0 */
+      background: -moz-linear-gradient(green, white); /* For Firefox 3.6 to 15 */
+      background: linear-gradient(green, white); /* Standard syntax */
+    }
+
+    .fill {
+      /*color: rgba(0,0,0,0.12);*/
+      top: 0px;
+      -webkit-text-fill-color : #1f6fd9;
+      -webkit-transition: height 50ms ease;
+      -moz-transition: height 50ms ease;
+      -ms-transition: height 50ms ease;
+      transition: height 50ms ease;
+      /*max-height: 15px;
+      overflow: hidden;*/
+    }
+
+    .stroked {
+      -webkit-text-stroke: 1px #1f6fd9;
+      -webkit-text-fill-color: rgb(211, 211, 211);
+    }
+
+    .max-out {
+      max-height: 35%;
+      overflow: hidden;
+    }
+
+  </style>
+</head>
+
+<body>
+  <div class="container">
+    <h2>Microphone Volume Meter Demo</h2>
+    <span class="fa-stack fa-5x">
+      <i class="fa fa-microphone fa-stack-2x stroked"></i>
+      <i class="fa fa-microphone fa-stack-2x fill max-out"></i>
+    </span>
+    <h3>Reversed Layering</h3>
+    <span class="fa-stack fa-5x">
+      <i class="fa fa-microphone fa-stack-2x fill"></i>
+      <i class="fa fa-microphone fa-stack-2x stroked max-out"></i>
+    </span>
+
+    <h3>Inline Meter 
+      <span class="fa-stack">
+        <i class="fa fa-microphone fa-stack-2x stroked"></i>
+        <span class="fill max-out">
+          <i class="fa fa-microphone fa-stack-2x"></i>
+        </span>
+        
+      </span>
+    </h3>
+
+    <h4>Each separately</h4>
+    <h4>
+    <i class="fa fa-microphone fa-5x stroked"></i>
+    <div>
+      <i class="fa fa-microphone fa-5x fill max-out"></i>
+    </div>
+    </h4>
+
+  </div> <!-- Container -->
+
+</body>
+
+</html>

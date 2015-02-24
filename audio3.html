@@ -27,17 +27,16 @@
 
     .big-text {
       font-size: 20;
-      margin-bottom: 20px;
       font-weight: 200;
-      line-height: 1.5;
+      line-height: 1.4;
     }
 
     .strong {
+      font-size: 21;
       font-weight: 500;
     }
 
     .content-buttons {
-      margin-right: 15px;
       margin-bottom: 15px;
     }
 
@@ -64,20 +63,51 @@
       background: linear-gradient(green, white); /* Standard syntax */
     }
 
+    .levels {
+      position: absolute;
+    }
+
+    .fill {
+      overflow: hidden;
+      bottom: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      color: rgba(0,0,0,0.12);
+      -webkit-transition: height 50ms ease;
+      -moz-transition: height 50ms ease;
+      -ms-transition: height 50ms ease;
+      transition: height 50ms ease;
+    }
+
+    .empty {
+      color: rgba(0,0,0,0.2);
+    }
+
+    .icon {
+      display: inline-block;
+      position: absolute;
+      text-align: center;
+      width: 100%;
+    }
+
+    .icon.stroked {
+      color: #1f6fd9;
+      -webkit-text-stroke: 1px #1f6fd9;
+      -webkit-text-fill-color: transparent;
+    }
+
+
+
   </style>
   <script type="text/javascript">
     $(document).ready(function () {
-      // $(".content-buttons").addClass("invisible");
+      // $(this).find(".content-buttons").addClass("invisible");
 
-      $(".panel").hover(
-        function hoverIn(e) {
-          $(this).find(".content-buttons").removeClass("invisible");
-          $(this).find("p.readable-content").addClass("strong");
-        },
-        function hoverOut(e) {
-          $(this).find(".content-buttons").addClass("invisible");
-          $(this).find("p.readable-content").removeClass("strong");
-        });
+      $(".panel").hover(function hoverInOut(e) {
+        // $(this).find(".content-buttons").toggleClass("invisible");
+        $(this).find("p.readable-content").toggleClass("strong");
+      });
 
     });
   </script>
@@ -86,7 +116,17 @@
 
 <body>
   <div class="container">
-    <h1>Audio Recording Demo 3 <i class="fa fa-microphone dynamic" id="mic-icon"></i></h1>
+    <h1>
+      <div class="mic levels">
+        <div class="empty">
+          <i class="icon stroked fa fa-microphone fa-3x" id="mic-icon-empty"></i>
+        </div>
+        <div class="fill">
+          <i class="icon fa fa-microphone fa-3x" id="mic-icon-fill"></i>
+        </div>
+      </div>
+      Audio Recording Demo 3 </h1>
+
     <br>
 
   <div class="panel panel-default"><div class="panel-body"><div class="row">
@@ -110,24 +150,26 @@
     </div>
   </div></div></div>
 
-  <div class="panel panel-default">
-  <div class="panel-body">
-    <div class="content-buttons-container pull-left">
-    <div class="content-buttons btn-group-lg" role="group" aria-label="...">
-      <button type="button" class="btn btn-primary">
-        <span class="glyphicon glyphicon-record" aria-hidden="true"></span>
-        Record</button>
-      <button type="button" class="btn btn-success">
-        <span class="glyphicon glyphicon-play" aria-hidden="true"></span>
-        Play</button>
-      <button type="button" class="btn btn-danger">
-        <span class="glyphicon glyphicon-stop" aria-hidden="true"></span>
-        Stop</button>
-    </div> </div>
-    <div class="p-container"><p id="fragment-1" class="readable-content big-text">
+  <div class="panel panel-default"><div class="panel-body"><div class="row">
+    <div class="col-lg-4 col-md-5 col-sm-6 content-buttons-container">
+      <div class="content-buttons btn-group-lg" role="group" aria-label="...">
+        <button type="button" class="btn btn-primary">
+          <i class="fa fa-dot-circle-o"></i>
+          Record</button>
+        <button type="button" class="btn btn-success">
+          <i class="fa fa-play"></i>
+          Play</button>
+        <button type="button" class="btn btn-danger">
+          <i class="fa fa-stop"></i>
+          Stop</button>
+      </div>
+    </div>
+    <div class="col-lg-8 col-md-7 col-sm-6 content-container">
+      <p id="fragment-0" class="readable-content big-text">
       They agreed that the one who first succeeded in making the traveler take his cloak off should be considered stronger than the other.
-    </p></div>
-  </div></div>
+      </p>
+    </div>
+  </div></div></div>
 
   </div> <!-- Container fluid -->
 

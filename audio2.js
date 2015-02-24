@@ -153,7 +153,6 @@ $(function() {
 				.css("-webkit-background-clip", "text")
 				.css("-webkit-text-fill-color", "transparent");
 				// .css("background", other-browser-specific gradient shit)
-			$("#avg").text(""+average);
 		};
 
 		var analyser = context.createAnalyser();
