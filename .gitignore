@@ -3,3 +3,5 @@ server/recordings/
 server/recordings8
 *.raw
 *.wav
+server/node_modules/csv/
+server/node_modules/parser/node_modules/

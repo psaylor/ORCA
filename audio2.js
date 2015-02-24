@@ -90,7 +90,28 @@ $(function() {
 			$("[data-fragment="+frag+"]").data('enabled', true);
 			$("[class=readable-fragment][data-fragment="+frag+"]")
 			.removeClass('bg-info bg-warning').addClass('bg-success');
-		}		
+
+			var numFrags = $(".readable-fragment").length;
+			if (frag == numFrags - 1) {
+				// done with reading
+				console.log("Finished reading and processing the story");
+				console.log("Setting up new stream");
+				var endedMetadata = { 
+					"type": 'reading_ended'
+				};
+				var reading_ended_stream = client.createStream(endedMetadata);
+				reading_ended_stream.end();
+			}
+		
+		} else if (meta.type === 'mispro-result') {
+			var mispronounced_words = [];
+			stream.on('data', function (data) {
+				console.log("Mispronounced: ", data);
+				var fragment = data.utterance_id;
+				var index = data.index;
+				$("[data-fragment="+fragment+"][data-index="+index+"]").addClass('mispro');
+			});
+		}
 
 		stream.on('end', function () {
 			console.log("Stream from server ended");
@@ -233,7 +254,6 @@ $(function() {
 		});
 		
 	};
-
 
 	var recordButtonSetup = function (recordBtn, fragmentElements) {
 		console.log("Setting up record button", recordBtn, fragmentElements);
@@ -460,7 +480,7 @@ $(function() {
 			// jquery selector searchable
 				wordButton.attr("data-fragment", i);
 				wordButton.data("enabled", false);
-				wordButton.data("index", j);
+				wordButton.attr("data-index", j);
 				wordButton.click(gen_wordButtonListener(wordButton, i, j));
 				lineElement.append(wordButton);
 				lineElement.append(" ");

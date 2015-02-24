@@ -9,6 +9,8 @@ var fs = require('fs');
 var util = require('util');
 var through = require('through');
 var split = require('split');
+var TimingTransformer = require('parser').TimingTransformer;
+var MisproTransformer = require('parser').MisproTransformer;
 
 var server = binaryServer({port: 9001});
 
@@ -35,12 +37,15 @@ var WAV_FILE_NAME_FORMAT = '%s/utterance_%d.wav';
 var TXT_FILE_NAME_FORMAT = '%s/utterance_%d.txt';
 
 var DATA_DIRECTORY_FORMAT = '/data/sls/scratch/psaylor/data/%d';
-var TIMINGS_DIRECTORY_FORMAT = '%s/time/';
+var TIMINGS_DIRECTORY_FORMAT = '%s/time';
+var MISPRO_DIRECTORY_FORMAT = '%s/misp';
 // first and second %d are speaker, which is timestamp
 // third %d is utterance number
 var TIMING_FILE_NAME_PATTERN = /utterance_\d+(?=.txt)/;
 var TIMING_FILE_ID_PATTERN = /\d+/;
 var TIMING_PATH_FORMAT = '%s/%s';
+var MISPRO_FILE_NAME_PATTERN = '%s/utterance_%d.out';
+var UTTERANCE_ID_PATTERN = /utterance_(\d)+.out/;
 
 console.log("Default sample rate: " + DEFAULT_SAMPLE_RATE);
 console.log("Recording directory format: " + RECORDINGS_DIRECTORY_FORMAT);
@@ -67,6 +72,53 @@ var recognizeUtterances = function (utteranceWavFile, utteranceTxtFile, dataOutp
 		});
 };
 
+var analyzeUtterances = function (dataOutputDir, clientCallback) {
+	console.log("Analyzing utterances for mispronunciation from ", dataOutputDir);
+	var command = ['./call_mispro_script.sh', dataOutputDir].join(' ');
+	var mispronounced_words = {};
+	var child = exec(command, 
+		function (error, stdout, stderr) {
+			console.log('Analysis stdout:', stdout);
+			console.log('Analysis stderr:', stderr);
+			if (error !== null) {
+				console.log("Analysis exec err:", error);
+				return;
+			}
+			// when done, send useful stuff to client
+			/* The detection results will be saved under $output_directory/misp, with the files named in the format of $uttid.out */
+			var misp_dir = util.format(MISPRO_DIRECTORY_FORMAT, dataOutputDir);
+			var misp_filenames = fs.readdirSync(misp_dir);
+			for (i = 0; i < misp_filenames.length; i++) {
+				var filename = misp_filenames[i];
+				var utterance_id = filename.match(UTTERANCE_ID_PATTERN)[1];
+				console.log("id of " + filename + " is ", utterance_id);
+
+
+				var filePath = misp_dir + "/" + filename;
+				console.log("Opening", filePath, " for parsing");
+				var readStream = fs.createReadStream(filePath);
+				console.log("readStream", readStream);
+				readStream.pipe(MisproTransformer()).pipe(gen_throughMisproData(utterance_id)).pipe(clientCallback);
+			}
+
+		});
+}
+
+var gen_throughMisproData = function (utterance_id) {
+	var count = 0;
+	var throughTimingData = through (
+		function write (wordBoundary) {
+			if (wordBoundary.hasError) {
+				wordBoundary.utterance_id = utterance_id;
+				wordBoundary.index = count;
+				console.log("Mispronounced ", wordBoundary);
+				this.queue(wordBoundary);
+			}
+			count+=1;
+		});
+	return throughTimingData;
+}
+
 var getAlignmentResults = function (results_dir, timing_data, callback) {
 	console.log("Reading alignment results from " + results_dir);
 	var timing_filenames = fs.readdirSync(results_dir);
@@ -88,7 +140,8 @@ var getAlignmentResults = function (results_dir, timing_data, callback) {
 
 		var filePath = util.format(TIMING_PATH_FORMAT, results_dir, filename);
 		var readStream = fs.createReadStream(filePath);
-		readStream.pipe(split()).pipe(gen_throughWordBoundaries()).pipe(gen_throughTimingData(utterance_id, timing_data));
+		readStream.pipe(TimingTransformer()).pipe(gen_throughTimingData(utterance_id, timing_data));
+		// readStream.pipe(split()).pipe(gen_throughWordBoundaries()).pipe(gen_throughTimingData(utterance_id, timing_data));
 
 
 		var gen_callCallback = function (utterance_id) {
@@ -166,7 +219,7 @@ var gen_throughTimingData = function (utterance_id, timing_data, callback) {
 
 	var throughTimingData = through (
 		function write (wordBoundary) {
-			wordBoundary = JSON.parse(wordBoundary);
+			// wordBoundary = JSON.parse(wordBoundary);
 			console.log("Utterance " + utterance_id + ": ", wordBoundary);
 			timing_data[utterance_id].push(wordBoundary);
 		});
@@ -192,13 +245,13 @@ var convertFileSox = function (rawFileName, saveToFileName) {
 	var command = exec(commandLine, logAll);
 };
 
-var cutFileSox = function (originalFileName, startTimeSeconds, endTimeSeconds, outputPipe) {
+var cutFileSox = function (originalFileName, startSample, endSample, outputPipe) {
 	// var COMMAND_FORMAT = 'sox %s -t wav - trim %d =%d';
 	// var COMMAND_FORMAT = 'sox %s %s trim %d =%d';
 	// var commandLine = util.format(COMMAND_FORMAT, originalFileName, outputFileName, startTimeSeconds, endTimeSeconds);
-	var ABSOLUTE_TIME_FORMAT = '=%d';
-	var startTimeFormatted = util.format(ABSOLUTE_TIME_FORMAT, startTimeSeconds);
-	var endTimeFormatted = util.format(ABSOLUTE_TIME_FORMAT, endTimeSeconds);
+	var ABSOLUTE_TIME_FORMAT = '=%ds';
+	var startTimeFormatted = util.format(ABSOLUTE_TIME_FORMAT, startSample);
+	var endTimeFormatted = util.format(ABSOLUTE_TIME_FORMAT, endSample);
 
 	var command = spawn('sox', [originalFileName, '-t', 'wav', '-', 'trim', startTimeFormatted, endTimeFormatted]);
 	command.on('close', function (code) {
@@ -207,12 +260,12 @@ var cutFileSox = function (originalFileName, startTimeSeconds, endTimeSeconds, o
 	command.stdout.pipe(outputPipe);
 }
 
-var concatFileSox = function (fileNameList, startTimeSeconds, endTimeSeconds, outputFileName, outputPipe) {
-	var ABSOLUTE_TIME_FORMAT = '=%d';
-	var startTimeFormatted = util.format(ABSOLUTE_TIME_FORMAT, startTimeSeconds);
-	var endTimeFormatted = util.format(ABSOLUTE_TIME_FORMAT, endTimeSeconds);
-	console.log('startTimeSeconds', startTimeSeconds, startTimeFormatted);
-	console.log("endTimeSeconds", endTimeSeconds, endTimeFormatted);
+var concatFileSox = function (fileNameList, startSample, endSample, outputFileName, outputPipe) {
+	var ABSOLUTE_TIME_FORMAT = '=%ds';
+	var startTimeFormatted = util.format(ABSOLUTE_TIME_FORMAT, startSample);
+	var endTimeFormatted = util.format(ABSOLUTE_TIME_FORMAT, endSample);
+	console.log('startTimeSeconds', startSample, startTimeFormatted);
+	console.log("endTimeSeconds", endSample, endTimeFormatted);
 
 	/*
 	Command line example of what we need to do
@@ -276,7 +329,7 @@ server.on('connection', function (client) {
 				var response_meta = {type: 'playback-result', first_word: startWordBoundary.word, last_word: endWordBoundary.word};
 				var response = client.createStream(response_meta);
 				var outputFileName = recordings_dir + '/output_' + start_utterance + '_' + end_utterance + '.wav';
-				concatFileSox(wavFileNameList, startWordBoundary.start, endWordBoundary.end, outputFileName, response);
+				concatFileSox(wavFileNameList, startWordBoundary.start_sample, endWordBoundary.end_sample, outputFileName, response);
 
 			} else { // within a single utterance recording
 				console.log("Requested playback within one utterance");
@@ -284,13 +337,19 @@ server.on('connection', function (client) {
 				var wavFileName = util.format(WAV_FILE_NAME_FORMAT, recordings_dir, start_utterance);
 				var response_meta = {type: 'playback-result', first_word: startWordBoundary.word, last_word: endWordBoundary.word};
 				var response = client.createStream(response_meta);
-				cutFileSox(wavFileName, startWordBoundary.start, endWordBoundary.end, response);
+				cutFileSox(wavFileName, startWordBoundary.start_sample, endWordBoundary.end_sample, response);
 
 			}
 			
 			return;
+		} else if (meta.type === 'reading_ended') {
+			console.log("Client reading ended. Process all utterances.");
+			var response_meta = {type: 'mispro-result'};
+			var response = client.createStream(response_meta);
+			analyzeUtterances(data_output_dir, response);
+			return;
 		}
-
+		console.log("Expecting normal audio stream");
 		var stream_id = meta.fragment;
 		var stream_text = meta.text.toLowerCase().replace(".", "") + "\n";
 		console.log("Utterances from stream " + stream_id + " for text " + stream_text);
