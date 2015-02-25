@@ -148,11 +148,19 @@ $(function() {
 			var array = new Uint8Array(analyser.frequencyBinCount);
 			analyser.getByteFrequencyData(array);
 			var average = getAverageVolume(array);
-			var bgWebKit = "-webkit-gradient(linear, left bottom, left top, color-stop(" + (average/100).toFixed(2) + ", rgb(14, 145, 19)), color-stop(.8, rgb(170, 227, 172)), color-stop(1, white))";
-			$("#mic-icon").css("background", bgWebKit)
-				.css("-webkit-background-clip", "text")
-				.css("-webkit-text-fill-color", "transparent");
+			// var bgWebKit = "-webkit-gradient(linear, left bottom, left top, color-stop(" + (average/100).toFixed(2) + ", rgb(14, 145, 19)), color-stop(.8, rgb(170, 227, 172)), color-stop(1, white))";
+			// $("#mic-icon").css("background", bgWebKit)
+			// 	.css("-webkit-background-clip", "text")
+			// 	.css("-webkit-text-fill-color", "transparent");
 				// .css("background", other-browser-specific gradient shit)
+			var baseline= 10;
+			var max = 99;
+			var filled_height = (baseline + (.5*average));
+			// .toFixed(0);
+			console.log("filled_height", filled_height);
+			var gray_height = 100 - Math.min(filled_height, max);
+			$(".fa-microphone.fill").css("max-height", gray_height+"%");
+			$("#vol").text(average);
 		};
 
 		var analyser = context.createAnalyser();

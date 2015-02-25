@@ -39,26 +39,34 @@
       background: linear-gradient(green, white); /* Standard syntax */
     }
 
+    .colors {
+      color: rgb(211, 211, 211);
+      color: rgba(0,0,0,0.12);
+    }
+
     .fill {
-      /*color: rgba(0,0,0,0.12);*/
-      top: 0px;
-      -webkit-text-fill-color : #1f6fd9;
+      -webkit-text-fill-color : rgb(211, 211, 211);
+      color: rgb(211, 211, 211);
       -webkit-transition: height 50ms ease;
       -moz-transition: height 50ms ease;
       -ms-transition: height 50ms ease;
       transition: height 50ms ease;
-      /*max-height: 15px;
-      overflow: hidden;*/
+      max-height: 25%;
+      overflow: hidden;
+
     }
 
     .stroked {
       -webkit-text-stroke: 1px #1f6fd9;
-      -webkit-text-fill-color: rgb(211, 211, 211);
+      -webkit-text-fill-color: #1f6fd9;
+      color: #1f6fd9;
     }
 
-    .max-out {
-      max-height: 35%;
-      overflow: hidden;
+    .glyph {
+      -webkit-user-select: none;
+      -moz-user-select: none;
+      -ms-user-select: none;
+      user-select: none;
     }
 
   </style>
@@ -66,35 +74,29 @@
 
 <body>
   <div class="container">
-    <h2>Microphone Volume Meter Demo</h2>
-    <span class="fa-stack fa-5x">
-      <i class="fa fa-microphone fa-stack-2x stroked"></i>
-      <i class="fa fa-microphone fa-stack-2x fill max-out"></i>
-    </span>
-    <h3>Reversed Layering</h3>
-    <span class="fa-stack fa-5x">
-      <i class="fa fa-microphone fa-stack-2x fill"></i>
-      <i class="fa fa-microphone fa-stack-2x stroked max-out"></i>
+    <h2>Microphone Volume Meter Demo <span class="small" id="vol">25</span></h2>
+    <h3> Block Meter </h3>
+    <span class="fa-stack fa-2x">
+      <i class="fa fa-microphone fa-stack-2x glyph stroked"></i>
+      <i class="fa fa-microphone fa-stack-2x glyph fill"></i>
     </span>
 
     <h3>Inline Meter 
       <span class="fa-stack">
-        <i class="fa fa-microphone fa-stack-2x stroked"></i>
-        <span class="fill max-out">
-          <i class="fa fa-microphone fa-stack-2x"></i>
-        </span>
-        
+        <i class="fa fa-microphone fa-stack-2x glyph stroked"></i>
+        <i class="fa fa-microphone fa-stack-2x glyph fill"></i>
       </span>
     </h3>
 
     <h4>Each separately</h4>
     <h4>
-    <i class="fa fa-microphone fa-5x stroked"></i>
-    <div>
-      <i class="fa fa-microphone fa-5x fill max-out"></i>
-    </div>
-    </h4>
+      Stroked
+      <i class="fa fa-microphone fa-3x glyph stroked"></i>      
+      <br>
+      Fill
+      <i class="fa fa-microphone fa-3x glyph fill"></i>      
 
+    </h4>
   </div> <!-- Container -->
 
 </body>
