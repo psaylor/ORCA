@@ -119,7 +119,7 @@ var gen_throughMisproData = function (utterance_id) {
 	return throughTimingData;
 }
 
-var getAlignmentResults = function (results_dir, timing_data, callback) {
+var getAlignmentResults = function (results_dir, stream_id, timing_data, callback) {
 	console.log("Reading alignment results from " + results_dir);
 	var timing_filenames = fs.readdirSync(results_dir);
 	console.log("Found timing files: ", timing_filenames);
@@ -131,7 +131,7 @@ var getAlignmentResults = function (results_dir, timing_data, callback) {
 		var utterance_id = TIMING_FILE_ID_PATTERN.exec(utterance)[0];
 		console.log("id of " + filename + " is ", utterance_id);
 
-		if (timing_data[utterance_id]) {
+		if (utterance_id !== stream_id) {
 			console.log("Timing results of", utterance_id, "already processed");
 			continue;
 		}
@@ -384,7 +384,7 @@ server.on('connection', function (client) {
 			console.log("Raw audio: " + rawFileName);
 			convertFileSox(rawFileName, wavFileName);
 			recognizeUtterances(wavFileName, txtFileName, data_output_dir, function () {
-				getAlignmentResults(timings_dir, timing_data, alignment_callback);
+				getAlignmentResults(timings_dir, stream_id, timing_data, alignment_callback);
 			});
 		});
 

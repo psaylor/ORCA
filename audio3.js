@@ -87,9 +87,10 @@ $(function() {
 		} else if (meta.type === 'timing-result') {
 			var frag = meta.fragment;
 			console.log("Server finished processing timing results for ", frag);
-			$("[data-fragment="+frag+"]").data('enabled', true);
-			$("[class=readable-fragment][data-fragment="+frag+"]")
-			.removeClass('bg-info bg-warning').addClass('bg-success');
+			var elementsToUpdate = $("[data-fragment="+frag+"]");
+			elementsToUpdate.data('enabled', true);
+			$(elementsToUpdate[2]).addClass('slant');
+			$(elementsToUpdate[1]).attr('disabled', false);
 
 			var numFrags = $(".readable-fragment").length;
 			if (frag == numFrags - 1) {
@@ -186,10 +187,12 @@ $(function() {
     };
 
 	onDisplayPrepared = function () {
-		var recordButton = $("#rec-btn");
+		var recordButtons = $(".record-btn");
 		var storyLines = $(".readable-fragment");
 		addTextSelectListeners();
-		recordButtonSetup(recordButton, storyLines);
+		for (var i=0; i < storyLines.length; i++) {
+			recordButtonSetup(recordButtons[i], storyLines[i]);
+		}
 	};
 
 	var clearSelection = function () {
@@ -256,13 +259,14 @@ $(function() {
 		
 	};
 
-	var recordButtonSetup = function (recordBtn, fragmentElements) {
-		console.log("Setting up record button", recordBtn, fragmentElements);
-		var fragmentIndex = 0;
-		var fragmentElement = $(fragmentElements[fragmentIndex]);
-		fragmentElement.addClass("bg-info");
+	var recording = false;
+	var currentFragment = 0;
+
+	var recordButtonSetup = function (recordBtn, fragmentElement) {
+		console.log("Setting up record button", recordBtn, fragmentElement);
+		fragmentElement = $(fragmentElement);
+
 		var recorder = null;
-		var recording = false;
 		var binStream = null;
 
 		var getCurrentFragment = function () {
@@ -367,17 +371,22 @@ $(function() {
 		};
 
 		var updateFragmentVars = function () {
-			fragmentIndex+= 1;
-			if (fragmentIndex < fragmentElements.length) {
-				fragmentElement = $(fragmentElements[fragmentIndex]);
-				fragmentid = fragmentElement.data("fragment");
-				fragmentElement.addClass('bg-info');
-			} else {
-				console.log("Exceeded fragment index.");
-				fragmentElement = null;
-				fragmentid = null;
-			}
-			console.log("Updating Fragment: ", fragmentElement, fragmentid);
+			currentFragment = Math.max(recordBtn.data("fragment") + 1, currentFragment);
+			console.log("Updating Fragment: currentFragment ", currentFragment);
+		}
+
+		var disableAllExcept = function (exceptBtn) {
+			$(".record-btn").attr("disabled", true);
+			$(exceptBtn).attr("disabled", false)
+				.html('<i class="fa fa-stop"></i> Stop')
+				.toggleClass("btn-primary btn-danger");
+		}
+
+		var resetButtons = function (exceptBtn){
+			$(".record-btn").attr("disabled", false);
+			$(exceptBtn).button('record')
+				.html('<i class="fa fa-dot-circle-o"></i> Re-record')
+				.toggleClass("btn-primary btn-danger");
 		}
 
 		var toggleRecording = function (e) {
@@ -385,40 +394,27 @@ $(function() {
 			console.log("binStream: ", binStream);
 			console.log("recording: ", recording);
 
-			$(recordBtn).toggleClass("btn-primary btn-danger");
 			if (recording) {
 				// stop recording
 				console.log("Disconnecting recorder ", recorder);
 				recorder.disconnect();
 				teardownStream();
 				recording = false;
-				fragmentElement.removeClass('bg-warning bg-info');
+				resetButtons(recordBtn);
 				updateFragmentVars();
 				return;
 			}
 			// start recording
+			disableAllExcept(recordBtn);
+
 			$("[id|=word-btn]").attr('enabled', false);
 			setupStream();
-			fragmentElement.removeClass('bg-info').addClass('bg-warning');
 			startGetUserMedia();
 			return;
 		};
 
 		setupAudioNodes();
 		$(recordBtn).click(toggleRecording);
-		$(recordBtn).hover(
-			function hoverIn(e) {
-				if (recording) {
-					return;
-				}
-				getCurrentFragment().removeClass("bg-info").addClass('bg-warning');
-			}, 
-			function hoverOut(e) {
-				if (recording) {
-					return;
-				}
-				getCurrentFragment().addClass("bg-info").removeClass("bg-warning");
-			});
 	};
 });
 
@@ -453,6 +449,20 @@ $(function() {
 		};
 	}
 
+	var gen_playButtonListener = function (frag, endIndex) {
+		return function requestPlayback (e) {
+			var metadata = {
+				type: 'playback-request',
+				start_fragment: frag,
+				start_index: 0,
+				end_fragment: frag,
+				end_index: endIndex,
+			};
+			console.log("Clicked playback button: ", metadata);
+			client.createStream(metadata);
+		};
+	}
+
 	var prepareReadableDisplay = function (readable) {
 		// expects readable {title: 't', content: ['c', 'o']}
 		var title = readable.title;
@@ -462,12 +472,13 @@ $(function() {
 		var titleNode = $('<h3>', {id: 'title', text: title});
 		$('h1').after(titleNode);
 
-		var storyElement = $("#readable-content");
+		var storyElement = $("#story-container");
+		console.log("Found story container", storyElement);
 
 		for (var i = 0; i < content.length; i++) {
 			var line = content[i];
 
-			var lineElement = $('<span>').attr('id', 'fragment-'+i).addClass('readable-fragment');
+			var lineElement = $('<span>').attr('id', 'fragment-'+i).addClass('readable-fragment big-text');
 			lineElement.data('text', line);
 			// this can either be set as an attr or as data, but only setting it as an attribute makes it
 			// jquery selector searchable
@@ -486,8 +497,35 @@ $(function() {
 				lineElement.append(wordButton);
 				lineElement.append(" ");
 			}
-			storyElement.append(lineElement);
+			console.log("building panel");
+			var panelElement = $('<div class="panel panel-default"><div class="panel-body"><div class="row"><div class="col-lg-4 col-md-5 col-sm-6 content-buttons-container glyph">' + 
+				'<div class="content-buttons btn-group-lg invisible" role="group" aria-label="...">' + 
+				'<button type="button" class="btn btn-primary record-btn"><i class="fa fa-dot-circle-o"></i> Record</button>' + 
+				'	<button type="button" class="btn btn-success play-btn"><i class="fa fa-play"></i> Play</button>' + 
+				'</div></div>' + 
+				'<div class="col-lg-8 col-md-7 col-sm-6 content-container"></div>' + 
+				'</div></div></div>');
+			panelElement.find('.content-container').append(lineElement);
+			panelElement.find('.record-btn').attr('data-fragment', i).data("isEnabled", (i===0));
+			panelElement.find('.play-btn')
+				.attr('data-fragment', i)
+				.attr("disabled", true)
+				.click(gen_playButtonListener(i, phrases.length-1));
+			panelElement.data('isCurrent', false);
+			storyElement.append(panelElement);
 		}
+
+		$(".panel").hover(function hoverInOut(e) {
+			var jqueryThis = $(this);
+			if (jqueryThis.data("isCurrent")) {
+				jqueryThis.find(".content-buttons").removeClass("invisible");
+		        jqueryThis.find(".readable-fragment").addClass("strong");
+			} else {
+				jqueryThis.find(".content-buttons").toggleClass("invisible");
+		        jqueryThis.find(".readable-fragment").toggleClass("strong");
+			}
+			
+		})
 
 		onDisplayPrepared();
 	};

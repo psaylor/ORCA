@@ -1,54 +1,64 @@
-
-.dynamic-mic {
-	display: table;
-	margin: 0 auto;
-	font-family: "Roboto Slab";
-	font-weight: 400;
-	font-size: 6em;
-	background: linear-gradient(330deg, #e05252 0%, #99e052 25%, #52e0e0 50%, #9952e0 75%, #e05252 100%);
-	-webkit-background-clip: text;
-	-webkit-text-fill-color: transparent;
-	line-height: 200px;
+/* Volume Meter Classes */
+.fill {
+  -webkit-text-fill-color : rgb(211, 211, 211);
+  color: rgb(211, 211, 211);
+  -webkit-transition: height 70ms ease;
+  -moz-transition: height 70ms ease;
+  -ms-transition: height 70ms ease;
+  transition: height 70ms ease;
+  max-height: 45%;
+  overflow: hidden;
 }
 
-h1 {
-	background-image: -webkit-gradient(
-	linear, 
-	left top, left bottom, 
-	from(rgba(0, 0, 0, 1)), 
-	to(rgba(0, 0, 255, 1))
-	);
-	-webkit-background-clip: text;
-	-webkit-text-fill-color: transparent;
-};
 
-/* --- start of magic ;-) --- */
-.white-gradient {
-	position: relative;
-}
-.white-gradient:after {
-	content: '';
-	display: block;
-	position: absolute;
-	top: 0;
-	left: 0;
-	height: 100%;
-	width: 100%;
-	filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#ffffff', endColorstr='#00ffffff',GradientType=0 );
-	background: -webkit-gradient(linear, left top, left bottom, color-stop(0%, rgba(255,255,255,1)), color-stop(100%, rgba(255,255,255,0)));
-	background: -webkit-linear-gradient(top, rgba(255,255,255,1) 0%,rgba(255,255,255,0) 100%);
-	background:    -moz-linear-gradient(top, rgba(255,255,255,1) 0%, rgba(255,255,255,0) 100%);
-	background:     -ms-linear-gradient(top, rgba(255,255,255,1) 0%, rgba(255,255,255,0) 100%);
-	background:      -o-linear-gradient(top, rgba(255,255,255,1) 0%, rgba(255,255,255,0) 100%);
-	background:         linear-gradient(top, rgba(255,255,255,1) 0%, rgba(255,255,255,0) 100%);
+.stroked {
+  -webkit-text-stroke: 1px #1f6fd9;
+  -webkit-text-fill-color: #1f6fd9;
+  color: #1f6fd9;
 }
 
-.white {
-	filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#ffffff', endColorstr='#00ffffff',GradientType=0 );
-	background: -webkit-gradient(linear, left top, left bottom, color-stop(0%, rgba(255,255,255,1)), color-stop(100%, rgba(255,255,255,0)));
-	background: -webkit-linear-gradient(top, rgba(255,255,255,1) 0%,rgba(255,255,255,0) 100%);
-	background:    -moz-linear-gradient(top, rgba(255,255,255,1) 0%, rgba(255,255,255,0) 100%);
-	background:     -ms-linear-gradient(top, rgba(255,255,255,1) 0%, rgba(255,255,255,0) 100%);
-	background:      -o-linear-gradient(top, rgba(255,255,255,1) 0%, rgba(255,255,255,0) 100%);
-	background:         linear-gradient(top, rgba(255,255,255,1) 0%, rgba(255,255,255,0) 100%);
+.stroked-green {
+  -webkit-text-stroke: 1px #138651;
+  -webkit-text-fill-color: #138651;
+  color: #138651;
+}
+
+.stroked-red {
+  -webkit-text-stroke: 1px #a12525;
+  -webkit-text-fill-color: #a12525;
+  color: #a12525;
+}
+
+.glyph {
+  -webkit-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+  user-select: none;
+}
+
+.align_bottom {
+  vertical-align: bottom;
+}
+
+/* Mispro Demo Classes */
+.big-text {
+  font-size: 20;
+  font-weight: 200;
+  line-height: 1.4;
+}
+
+.strong {
+  font-weight: 500;
+}
+
+.slant {
+  font-style: italic;
+}
+
+.content-buttons {
+  margin-bottom: 15px;
+}
+
+.mispro {
+  color: red;
 }
