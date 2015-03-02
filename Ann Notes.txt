@@ -1,7 +1,0 @@
-Ann Notes
-- wav file
-- text file of what was said (.txt)
-same name, different extensions
-
-
-annlee@panda /data/sls/scratch/annlee/kaldi/for_trish

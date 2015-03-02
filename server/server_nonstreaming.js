@@ -1,10 +1,11 @@
+'use strict'
+
 var binaryServer = require('binaryjs').BinaryServer;
 var wav = require('wav');
 var exec = require('child_process').exec;
 var execFile = require('child_process').execFile;
 var spawn = require('child_process').spawn;
 var os = require('os');
-var ffmpeg = require('fluent-ffmpeg');
 var fs = require('fs');
 var util = require('util');
 var through = require('through');

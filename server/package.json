@@ -10,15 +10,15 @@
   "license": "ISC",
   "dependencies": {
     "binaryjs": "^0.2.1",
-    "sox": "^0.1.0"
+    "sox-audio": "^0.1.0"
   },
   "devDependencies": {},
   "repository": {
     "type": "git",
-    "url": "https://github.com/saylorp/ORCA.git"
+    "url": "https://github.com/psaylor/ORCA.git"
   },
   "bugs": {
-    "url": "https://github.com/saylorp/ORCA/issues"
+    "url": "https://github.com/psaylor/ORCA/issues"
   },
-  "homepage": "https://github.com/saylorp/ORCA"
+  "homepage": "https://github.com/psaylor/ORCA"
 }

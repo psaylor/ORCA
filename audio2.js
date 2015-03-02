@@ -159,7 +159,12 @@ $(function() {
 
 		var analyser = context.createAnalyser();
 		analyser.smoothingTimeConstant = 0.3;
-		analyser.fftSize = 1024;
+		analyser.fftSize = 1024; // could probably do 32 or some power of 2
+		// maybe use 10th percentile of buffer as min, and lowest min over the past 10
+		// have slow time constant that over a period of seconds would adjust the microphone settings
+		// find out more about the FFT focus more on the speech range
+		// telephone rnage between 300 and 3300? Hz so only avg in that range, ignore high freq stuff
+		// make it adapt in a simple way, such as for a noisy environment
 
 		navigator.getUserMedia(
 			session,
