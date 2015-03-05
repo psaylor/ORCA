@@ -1,0 +1,46 @@
+canvas {
+    width: 1000px;
+    height: 325px;
+    display: block;
+}
+
+div.spectrum {
+    height: 275px;
+    position: relative;
+    background-color: rgba(211, 211, 211, 0.3);
+}
+
+div.spectrum-bar {
+    margin-right: 1px;
+    height: 30%;
+    position: absolute;
+    bottom: 0;
+}
+
+div.spectrum-ruler {
+    width: 2px;
+    background-color: #666666;
+    height: 100%;
+    position: absolute;
+    bottom: 0;
+}
+
+div.unfiltered {
+    background-color: #1f6fd9;
+}
+
+div.filtered {
+    background-color: #ff6910;
+}
+
+div.human-range {
+    background-color: #666666;
+}
+
+div.unfiltered.human-range {
+    background-color: #124180;
+}
+
+div.filtered.human-range {
+    background-color: #993F0A;
+}

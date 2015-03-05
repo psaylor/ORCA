@@ -23,6 +23,12 @@
   color: #138651;
 }
 
+.stroked-orange {
+  -webkit-text-stroke: 1px #ff6910;
+  -webkit-text-fill-color: #ff6910;
+  color: #ff6910;
+}
+
 .stroked-red {
   -webkit-text-stroke: 1px #a12525;
   -webkit-text-fill-color: #a12525;

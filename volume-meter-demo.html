@@ -1,0 +1,89 @@
+<html>
+<head>
+  <script type="application/javascript;version=1.7"></script> <!-- Use js v 1.7 -->
+  <!-- jQuery -->
+  <script src="https://code.jquery.com/jquery-1.11.0.min.js"></script>
+  <!-- Bootstrap -->
+  <link rel="stylesheet" href="//netdna.bootstrapcdn.com/bootstrap/3.1.1/css/bootstrap.min.css">
+  <link rel="stylesheet" href="//maxcdn.bootstrapcdn.com/font-awesome/4.3.0/css/font-awesome.min.css">
+  <script src="//netdna.bootstrapcdn.com/bootstrap/3.1.1/js/bootstrap.min.js"></script>
+  <!-- Other Third Party Libraries -->
+  <script src="third-party-libs/modernizr.custom.68208.js"></script>
+  <!-- My Files -->
+  <link rel="stylesheet" type="text/css" href="audio_demo.css">
+  <link rel="stylesheet" type="text/css" href="volume-meter-demo.css">
+  <script src="volume-meter-demo.js"></script>
+  
+</head>
+
+<body>
+  <div class="container">
+    <h2>Microphone Volume Meter Demo <span class="small" id="vol">0</span></h2>
+  
+    <span class="fa-stack fa-5x" data-toggle="tooltip" data-placement="top" title="Unfiltered audio, all frequencies">
+      <i class="fa fa-microphone fa-stack-2x glyph stroked"></i>
+      <i class="fa fa-microphone fa-stack-2x glyph fill unfiltered-all"></i>
+    </span>
+
+    <span class="fa-stack fa-5x" data-toggle="tooltip" data-placement="top" title="Unfiltered audio, human frequencies">
+      <i class="fa fa-microphone fa-stack-2x glyph stroked"></i>
+      <i class="fa fa-microphone fa-stack-2x glyph fill unfiltered-ranged"></i>
+    </span>
+
+    <span class="fa-stack fa-5x" data-toggle="tooltip" data-placement="top" title="Filtered audio, all frequencies">
+      <i class="fa fa-microphone fa-stack-2x glyph stroked-orange"></i>
+      <i class="fa fa-microphone fa-stack-2x glyph fill filtered filtered-all"></i>
+    </span>
+
+    <span class="fa-stack fa-5x" data-toggle="tooltip" data-placement="top" title="Filtered audio, human frequencies">
+      <i class="fa fa-microphone fa-stack-2x glyph stroked-orange"></i>
+      <i class="fa fa-microphone fa-stack-2x glyph fill filtered filtered-ranged"></i>
+    </span>
+
+    <h3>Frequency Spectrum</h3>
+    <!-- <canvas id="canvas-1"></canvas> -->
+    <div id="spectrum-1" class="spectrum clearfix" data-toggle="tooltip" data-placement="right" title="The unfiltered frequency spectrum. Darker bars correspond to frequencies between 300 and 3300 Hz"> 
+    </div>
+    <br/>
+    <h3>Filtered Frequency Spectrum</h3>
+    <!-- <canvas id="canvas-2"></canvas> -->
+    <div id="spectrum-2" class="spectrum clearfix" data-toggle="tooltip" data-placement="right" title="The frequency spectrum after low and high pass filters. Darker bars correspond to frequencies between 300 and 3300 Hz"> 
+    </div>
+
+    <h3>
+      Filtered and Unfiltered Together
+      <span class="fa-stack" data-toggle="tooltip" data-placement="top" title="Unfiltered audio, all frequencies">
+        <i class="fa fa-microphone fa-stack-2x glyph stroked"></i>
+        <i class="fa fa-microphone fa-stack-2x glyph fill unfiltered-all"></i>
+      </span>
+
+      <span class="fa-stack" data-toggle="tooltip" data-placement="top" title="Unfiltered audio, human frequencies">
+        <i class="fa fa-microphone fa-stack-2x glyph stroked"></i>
+        <i class="fa fa-microphone fa-stack-2x glyph fill unfiltered-ranged"></i>
+      </span>
+
+      <span class="fa-stack" data-toggle="tooltip" data-placement="top" title="Filtered audio, all frequencies">
+        <i class="fa fa-microphone fa-stack-2x glyph stroked-orange"></i>
+        <i class="fa fa-microphone fa-stack-2x glyph fill filtered filtered-all"></i>
+      </span>
+
+      <span class="fa-stack" data-toggle="tooltip" data-placement="top" title="Filtered audio, human frequencies">
+        <i class="fa fa-microphone fa-stack-2x glyph stroked-orange"></i>
+        <i class="fa fa-microphone fa-stack-2x glyph fill filtered filtered-ranged"></i>
+      </span>
+
+    </h3>
+    <div id="spectrum-3" class="spectrum clearfix"> </div>
+
+    <br>
+    <br>
+    <br>
+    <br>
+    <br>
+    <br>
+    <br>
+  </div> <!-- Container -->
+
+</body>
+
+</html>
