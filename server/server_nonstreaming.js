@@ -124,15 +124,15 @@ var getAlignmentResults = function (results_dir, stream_id, timing_data, callbac
 	console.log("Reading alignment results from " + results_dir);
 	var timing_filenames = fs.readdirSync(results_dir);
 	console.log("Found timing files: ", timing_filenames);
-	for (i = 0; i < timing_filenames.length; i++) {
-		filename = timing_filenames[i];
+	for (var i = 0; i < timing_filenames.length; i++) {
+		var filename = timing_filenames[i];
 		// str.match(pattern); returns array of matches
 		// or patt.exec(str); returns the first match
 		var utterance = TIMING_FILE_NAME_PATTERN.exec(filename)[0];
 		var utterance_id = TIMING_FILE_ID_PATTERN.exec(utterance)[0];
 		console.log("id of " + filename + " is ", utterance_id);
 
-		if (utterance_id !== stream_id) {
+		if (utterance_id != stream_id) {
 			console.log("Timing results of", utterance_id, "already processed");
 			continue;
 		}
@@ -325,7 +325,9 @@ server.on('connection', function (client) {
 				var wavFileNameList = [];
 				for (var id = start_utterance; id <= end_utterance; id++) {
 					var wavFileName = util.format(WAV_FILE_NAME_FORMAT, recordings_dir, id);
-					wavFileNameList.push(wavFileName);
+					if (fs.existsSync(wavFileName)) {
+						wavFileNameList.push(wavFileName);
+					}
 				}
 				var response_meta = {type: 'playback-result', first_word: startWordBoundary.word, last_word: endWordBoundary.word};
 				var response = client.createStream(response_meta);
@@ -353,7 +355,7 @@ server.on('connection', function (client) {
 		console.log("Expecting normal audio stream");
 		var stream_id = meta.fragment;
 		var stream_text = meta.text.toLowerCase().replace(".", "") + "\n";
-		console.log("Utterances from stream " + stream_id + " for text " + stream_text);
+		console.log("Utterances from stream " + stream_id + " for text " + stream_text, "with sample rate", meta.sampleRate);
 		
 
 		var rawFileName = util.format(RAW_FILE_NAME_FORMAT, recordings_dir, stream_id);

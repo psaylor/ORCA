@@ -128,46 +128,79 @@ $(function() {
 	var context = new audioContext();
 
 	var session = {audio: true, video: false};
-	var audioInput = null;
+	var audioStreamSource = null;
 
-	var getAverageVolume = function (typedArray) {
-		var values = 0;
-		var average;
-		var length = typedArray.length;
-		for (var i = 0; i < length; i++) {
-			values += typedArray[i];
-		}
-		average = values / length;
-		return average;
+	var ANALYSER_FFT_SIZE = 128;
+
+	/* Computes and returns the average of the values in a typed array */
+	var getAverage = function(typedArray, fromIndex, toIndex) {
+	    var valueSum = 0;
+
+	    var fromIndex = fromIndex || 0;
+	    var toIndex = toIndex || typedArray.length;
+
+	    for (var i = fromIndex; i < toIndex; i++) {
+	        valueSum += typedArray[i];
+	    }
+
+	    var average = valueSum / (toIndex - fromIndex);
+	    return average;
 	};
 
-	var setupAudioNodes= function () {
-		// called whenever the 2048 frames have been sampled, approx 21 times a second
-		var BASE_HEIGHT = 25;
-		var MAX_HEIGHT = 100;
+    window.getFrequencyIndex = function(frequency) {
+        var sampleRate = 44100;
+        var index = Math.floor((frequency * ANALYSER_FFT_SIZE) / sampleRate);
+        return index;
+    };
 
+    var minFreqIndex = window.getFrequencyIndex(300);
+    var maxFreqIndex = window.getFrequencyIndex(3300);
+
+    var volumeMeters = $('fa-microphone.fill');
+    var MAX_METER_HEIGHT = 100;
+    var BASE_METER_HEIGHT = 35;
+    var remainingHeight = MAX_METER_HEIGHT - BASE_METER_HEIGHT;
+
+    /* Given the current averageVolume, updates the height of the volumeMeter */
+    // should make this calculation configurable by passing in function to use
+    // for calculating the new height
+    // volumeLevel is between 0 and 1, where 1 is max volume
+    var adjustVolumeMeter = function(volumeMeter, volumeLevel) {
+        var filledHeight = (volumeLevel * remainingHeight) + BASE_METER_HEIGHT;
+        filledHeight = filledHeight.toFixed();
+        var grayHeight = MAX_METER_HEIGHT - 
+            Math.min(filledHeight, MAX_METER_HEIGHT);
+        volumeMeter.css('max-height', grayHeight + '%');
+    };
+
+	var setupAudioNodesForMeter = function () {
+		// called whenever the 2048 frames have been sampled, approx 21 times a second
 		javascriptNode = context.createScriptProcessor(2048, 1, 1);
 		javascriptNode.connect(context.destination);
 		javascriptNode.onaudioprocess = function () {
 			var array = new Uint8Array(analyser.frequencyBinCount);
 			analyser.getByteFrequencyData(array);
-			var average = getAverageVolume(array);
-			var filled_height = (BASE_HEIGHT + (1.0 * average)).toFixed();
-			var gray_height = MAX_HEIGHT - Math.min(filled_height, MAX_HEIGHT);
-			$(".fa-microphone.fill").css("max-height", gray_height+"%");
-			$("#vol").text(average.toFixed(0));
+			var average = getAverage(array, minFreqIndex, maxFreqIndex) / 255;
+			adjustVolumeMeter(volumeMeters, average);
 		};
 
 		var analyser = context.createAnalyser();
-		analyser.smoothingTimeConstant = 0.3;
-		analyser.fftSize = 1024;
+		analyser.smoothingTimeConstant = 0.5;
+		analyser.fftSize = ANALYSER_FFT_SIZE;
+
+		if (window.GLOB && GLOB.audioStreamSource) {
+			console.log("audioStreamSource already created");
+			return;
+		}
 
 		navigator.getUserMedia(
 			session,
 			function(localMediaStream) {
-				audioInput = context.createMediaStreamSource(localMediaStream);
-
-				audioInput.connect(analyser);
+				console.log("Accessing local audio stream!");
+				window.GLOB = window.GLOB || {};
+				window.GLOB.audioStreamSource = context.createMediaStreamSource(localMediaStream);
+				audioStreamSource = window.GLOB.audioStreamSource;
+				audioStreamSource.connect(analyser);
 				analyser.connect(javascriptNode);
 				javascriptNode.connect(context.destination);
 			},
@@ -176,6 +209,8 @@ $(function() {
 			}
 		);
 	};
+
+	setupAudioNodesForMeter();
 	
 	var convertFloat32ToInt16 = function (buffer) {
         var l = buffer.length;
@@ -205,7 +240,7 @@ $(function() {
 
 	var addTextSelectListeners = function () {
 		console.log("Adding text selection listeners");
-		var content = $("#readable-content");
+		var content = $(".readable-fragment");
 		content.on('mouseup', function (e) {
 			console.log("Dragging started");
 			var userSelection;
@@ -259,6 +294,8 @@ $(function() {
 		
 	};
 
+	
+
 	var recording = false;
 	var currentFragment = 0;
 
@@ -266,6 +303,7 @@ $(function() {
 		console.log("Setting up record button", recordBtn, fragmentElement);
 		fragmentElement = $(fragmentElement);
 
+		var recorderBufferSize = 2048;
 		var recorder = null;
 		var binStream = null;
 
@@ -278,7 +316,8 @@ $(function() {
 				console.log("Setting up new stream");
 				var setupMetadata = { 
 					"fragment": fragmentElement.data("fragment"),
-					"text": fragmentElement.data("text")
+					"text": fragmentElement.data("text"),
+					"sampleRate": context.sampleRate,
 				};
 				binStream = client.createStream(setupMetadata);
 
@@ -320,54 +359,25 @@ $(function() {
 			console.log("Writing %d length buffer to binary stream: %d ", converted.byteLength);
 		};
 
-		var startGetUserMedia = function () {
-			if (audioInput !== null) {
+		var startRecorder = function () {
+			// create a javascript node for recording
+			recorder = context.createScriptProcessor(recorderBufferSize, 1, 1);
+			// specify the processing function
+			recorder.onaudioprocess = recorderProcess;
+			// connect recorder to the previous destination so it gets called
+			recorder.connect(context.destination);
+
+			if (audioStreamSource !== null) {
 				console.log("Audio input already created");
-				var bufferSize = 2048;
-
-				// create a javascript node for recording
-				recorder = context.createScriptProcessor(bufferSize, 1, 1);
-
-				// specify the processing function
-				recorder.onaudioprocess = recorderProcess;
-				// connect the stream to our recorder
-				audioInput.connect(recorder);
-				// connect recorder to the previous destination
-				recorder.connect(context.destination);
-
-				console.log("audioInput", audioInput);
-
+				
+				audioStreamSource.connect(recorder);
+				
+				console.log("audioInput", audioStreamSource);
 				console.log("Connected recorder", recorder);
 				return;
 			}
-			navigator.getUserMedia(
-				session,
-				function(localMediaStream) {
-					// you can only have 6 instances of audioContext at a time
-					// Failed to construct 'AudioContext': number of hardware contexts reached maximum (6)
-					// var context = new audioContext();
-					var audioInput = context.createMediaStreamSource(localMediaStream);
-					console.log(audioInput);
-					var bufferSize = 2048;
 
-					// create a javascript node for recording
-					recorder = context.createScriptProcessor(bufferSize, 1, 1);
-
-					// specify the processing function
-					recorder.onaudioprocess = recorderProcess;
-					// connect the stream to our recorder
-					audioInput.connect(recorder);
-					// connect recorder to the previous destination
-					recorder.connect(context.destination);
-
-					console.log("audioInput", audioInput);
-
-					console.log("Connected recorder", recorder);
-				},
-				function(e) { // errorCallback
-					console.log("Media access rejected.", e);
-				}
-			);
+			console.log("NO AUDIO STREAM SOURCE!");
 		};
 
 		var updateFragmentVars = function () {
@@ -409,11 +419,10 @@ $(function() {
 
 			$("[id|=word-btn]").attr('enabled', false);
 			setupStream();
-			startGetUserMedia();
+			startRecorder();
 			return;
 		};
 
-		setupAudioNodes();
 		$(recordBtn).click(toggleRecording);
 	};
 });
